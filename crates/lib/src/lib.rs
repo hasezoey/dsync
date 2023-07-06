@@ -1,6 +1,9 @@
 mod code;
+mod error;
 mod file;
 mod parser;
+
+pub use error::{Error, Result};
 
 use file::MarkedFile;
 use parser::ParsedTableMacro;
@@ -141,7 +144,7 @@ impl GenerationConfig<'_> {
 pub fn generate_code(
     diesel_schema_file_contents: String,
     config: GenerationConfig,
-) -> anyhow::Result<Vec<ParsedTableMacro>> {
+) -> Result<Vec<ParsedTableMacro>> {
     parser::parse_and_generate_code(diesel_schema_file_contents, &config)
 }
 

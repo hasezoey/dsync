@@ -284,10 +284,10 @@ name = "libdsync-hasezoey"
 version = "0.0.13"
 dependencies = [
  "Inflector",
- "anyhow",
  "indoc",
  "proc-macro2",
  "syn 1.0.107",
+ "thiserror",
 ]
 
 [[package]]
@@ -436,6 +436,26 @@ checksum = "8e6bf6f19e9f8ed8d4048dc22981458ebcf406d67e94cd422e5ecd73d63b3237"
 dependencies = [
  "rustix 0.37.23",
  "windows-sys",
+]
+
+[[package]]
+name = "thiserror"
+version = "1.0.41"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c16a64ba9387ef3fdae4f9c1a7f07a0997fce91985c0336f1ddc1822b3b37802"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.41"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d14928354b01c4d6a4f0e549069adef399a284e7995c7ccca94e8a07a5346c59"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.23",
 ]
 
 [[package]]

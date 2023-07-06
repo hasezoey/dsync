@@ -2,7 +2,7 @@ use inflector::Inflector;
 use syn::Ident;
 use syn::Item::Macro;
 
-use crate::{code, GenerationConfig};
+use crate::{code, GenerationConfig, Result};
 
 pub const FILE_SIGNATURE: &str = "/* This file is generated and managed by dsync */";
 
@@ -52,7 +52,7 @@ pub struct ParsedJoinMacro {
 pub fn parse_and_generate_code(
     schema_file_contents: String,
     config: &GenerationConfig,
-) -> anyhow::Result<Vec<ParsedTableMacro>> {
+) -> Result<Vec<ParsedTableMacro>> {
     let schema_file = syn::parse_file(&schema_file_contents).unwrap();
 
     let mut tables: Vec<ParsedTableMacro> = vec![];
