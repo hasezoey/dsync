@@ -5,7 +5,26 @@ use std::collections::HashMap;
 mod clap_conf;
 mod completions;
 
-fn main() -> anyhow::Result<()> {
+fn main() {
+    let res = actual_main();
+
+    if let Err(err) = res {
+        eprintln!("Error:\n{err}");
+        let backtrace = err.backtrace().to_string();
+
+        if backtrace == "disabled backtrace" {
+            eprintln!(
+                "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+            );
+        } else {
+            eprintln!("{}", backtrace);
+        }
+
+        std::process::exit(1);
+    }
+}
+
+fn actual_main() -> anyhow::Result<()> {
     let cli = clap_conf::CliDerive::parse();
 
     if let Some(subcommand) = cli.subcommands {
