@@ -166,12 +166,9 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
         match &item {
             proc_macro2::TokenTree::Punct(punct) => {
                 // skip any "#[]"
-                match punct.to_string().as_str() {
-                    "#" => {
-                        skip_square_brackets = true;
-                        continue;
-                    }
-                    _ => {}
+                if punct.to_string().as_str() == "#" {
+                    skip_square_brackets = true;
+                    continue;
                 }
             }
             proc_macro2::TokenTree::Ident(ident) => {
@@ -227,10 +224,7 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
                             proc_macro2::TokenTree::Punct(punct) => {
                                 let char = punct.as_char();
 
-                                if char == '#' {
-                                    // Skip any additional #[]
-                                    continue;
-                                } else if char == '-' || char == '>' {
+                                if char == '-' || char == '>' || char == '#'  {
                                     // nothing for arrow
                                     continue;
                                 } else if char == ',' && column_name.is_some() && column_type.is_some() {
