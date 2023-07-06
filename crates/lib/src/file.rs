@@ -1,23 +1,23 @@
 use std::path::PathBuf;
 
+use crate::error::{IOErrorToError, Result};
+
 pub struct MarkedFile {
     pub file_contents: String,
     pub path: PathBuf,
 }
 
 impl MarkedFile {
-    pub fn new(path: PathBuf) -> MarkedFile {
-        MarkedFile {
+    pub fn new(path: PathBuf) -> Result<MarkedFile> {
+        Ok(MarkedFile {
             path: path.clone(),
             file_contents: if !path.exists() {
-                std::fs::write(&path, "")
-                    .unwrap_or_else(|_| panic!("Could not write to '{path:#?}'"));
+                std::fs::write(&path, "").attach_path_err(&path)?;
                 "".to_string()
             } else {
-                std::fs::read_to_string(&path)
-                    .unwrap_or_else(|_| panic!("Could not read '{path:#?}'"))
+                std::fs::read_to_string(&path).attach_path_err(&path)?
             },
-        }
+        })
     }
 
     pub fn has_use_stmt(&self, use_name: &str) -> bool {
@@ -97,13 +97,11 @@ impl MarkedFile {
         }
     }
 
-    pub fn write(&self) {
-        std::fs::write(&self.path, &self.file_contents)
-            .unwrap_or_else(|_| panic!("Could not write to file '{:#?}'", self.path));
+    pub fn write(&self) -> Result<()> {
+        std::fs::write(&self.path, &self.file_contents).attach_path_err(&self.path)
     }
 
-    pub fn delete(self) {
-        std::fs::remove_file(&self.path)
-            .unwrap_or_else(|_| panic!("Could not delete redundant file '{:#?}'", self.path));
+    pub fn delete(self) -> Result<()> {
+        std::fs::remove_file(&self.path).attach_path_err(&self.path)
     }
 }

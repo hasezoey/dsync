@@ -32,6 +32,13 @@ impl Error {
         return &self.backtrace;
     }
 
+    pub fn other<M>(msg: M) -> Self
+    where
+        M: Into<String>,
+    {
+        return Self::new(ErrorEnum::Other(msg.into()));
+    }
+
     /// Create a custom [ioError] with this [Error] wrapped around with a [Path] attached
     pub fn custom_ioerror_path<M, P>(kind: std::io::ErrorKind, msg: M, path: P) -> Self
     where
@@ -41,6 +48,17 @@ impl Error {
         return Self::new(ErrorEnum::IoError(
             ioError::new(kind, msg.into()),
             format_path(path.as_ref().to_string_lossy().to_string()),
+        ));
+    }
+
+    pub fn not_a_directory<M, P>(msg: M, path: P) -> Self
+    where
+        M: Into<String>,
+        P: AsRef<Path>,
+    {
+        return Self::new(ErrorEnum::NotADirectory(
+            msg.into(),
+            path.as_ref().to_string_lossy().to_string(),
         ));
     }
 }
@@ -74,10 +92,53 @@ pub enum ErrorEnum {
     /// Argument 1 (String) is up to the implementation to set, commonly the path
     #[error("IoError: {0}; {1}")]
     IoError(std::io::Error, String),
+    /// Variant for when a directory path was expected but did not exist yet or was not a directory
+    /// TODO: replace with io::ErrorKind::NotADirectory once stable <https://github.com/rust-lang/rust/issues/86442>
+    #[error("NotADirectory: {0}; Path: \"{1}\"")]
+    NotADirectory(String, String),
+
+    /// Variant for Other messages
+    #[error("Other: {0}")]
+    Other(String),
 }
 
 /// Helper function to keep consistent formatting
 #[inline]
 fn format_path(msg: String) -> String {
     return format!("Path \"{}\"", msg);
+}
+
+/// Trait to map [std::io::Error] into [Error]
+pub trait IOErrorToError<T> {
+    /// Map a [std::io::Error] to [Error] with a [std::path::Path] attached
+    fn attach_path_err<P: AsRef<Path>>(self, path: P) -> Result<T>;
+
+    /// Map a [std::io::Error] to [Error] with a [std::path::Path] and message attached
+    fn attach_path_msg<P: AsRef<Path>, M: AsRef<str>>(self, path: P, msg: M) -> Result<T>;
+}
+
+impl<T> IOErrorToError<T> for std::result::Result<T, std::io::Error> {
+    fn attach_path_err<P: AsRef<Path>>(self, path: P) -> Result<T> {
+        return match self {
+            Ok(v) => Ok(v),
+            Err(e) => Err(crate::Error::new(ErrorEnum::IoError(
+                e,
+                format_path(path.as_ref().to_string_lossy().to_string()),
+            ))),
+        };
+    }
+
+    fn attach_path_msg<P: AsRef<Path>, M: AsRef<str>>(self, path: P, msg: M) -> Result<T> {
+        return match self {
+            Ok(v) => Ok(v),
+            Err(e) => Err(crate::Error::new(ErrorEnum::IoError(
+                e,
+                format!(
+                    "{msg} {path}",
+                    msg = msg.as_ref(),
+                    path = format_path(path.as_ref().to_string_lossy().to_string())
+                ),
+            ))),
+        };
+    }
 }

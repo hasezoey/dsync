@@ -48,7 +48,7 @@ fn main() -> anyhow::Result<()> {
             schema_path: args.schema_path,
             model_path: args.model_path,
         },
-    );
+    )?;
 
     Ok(())
 }
