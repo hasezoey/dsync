@@ -16,7 +16,9 @@ tsync = []
 async = []
 
 [dependencies]
-structopt = "0.3"
+clap = { version = "4.3", features = ["derive", "wrap_help"] }
+clap_complete = "4.3"
+anyhow = "1"
 libdsync-hasezoey = { path = "../lib" }
 
 [[bin]]
