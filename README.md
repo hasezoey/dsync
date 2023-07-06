@@ -119,7 +119,7 @@ cargo install dsync-hasezoey
 * note: the CLI has fail-safes to prevent accidental file overwriting
 
 ```sh
-dsync -i src/schema.rs -o src/models
+dsync -i src/schema.rs -o src/models -c "diesel::SqliteConnection"
 ```
 
 ## Docs
