@@ -1,0 +1,27 @@
+[package]
+name = "libdsync-hasezoey"
+description = "Generate rust structs & query functions from diesel schema files."
+version = "0.0.13"
+readme = "README.md"
+repository = "https://github.com/hasezoey/dsync"
+license = "MIT OR Apache-2.0"
+keywords = ["diesel", "crud", "database", "codegen", "generation"]
+categories = ["command-line-utilities", "development-tools", "development-tools::ffi", "web-programming"]
+authors = ["Haris <4259838+Wulf@users.noreply.github.com>", "hasezoey <hasezoey@gmail.com>"]
+edition = "2021"
+
+[features]
+default = ["tsync"]
+tsync = []
+async = []
+
+[dependencies]
+syn = { version = "1", features = ["extra-traits", "full"] }
+anyhow = "1"
+proc-macro2 = "1"
+indoc = "2.0.0"
+Inflector = { version = "0.11.4" }
+
+[lib]
+name = "dsync_hasezoey"
+path = "src/lib.rs"
