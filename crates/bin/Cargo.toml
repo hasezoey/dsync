@@ -11,9 +11,10 @@ authors = ["Haris <4259838+Wulf@users.noreply.github.com>", "hasezoey <hasezoey@
 edition = "2021"
 
 [features]
-default = ["tsync"]
-tsync = []
-async = []
+default = ["tsync", "backtrace"]
+tsync = ["libdsync-hasezoey/tsync"]
+async = ["libdsync-hasezoey/async"]
+backtrace = ["libdsync-hasezoey/backtrace"]
 
 [dependencies]
 clap = { version = "4.3", features = ["derive", "wrap_help"] }
