@@ -51,6 +51,7 @@ impl Error {
         ErrorEnum::UnsupportedSchemaFormat
     );
     fn_string!(unsupported_type, ErrorEnum::UnsupportedType);
+    fn_string!(no_file_signature, ErrorEnum::NoFileSignature);
 
     /// Create a custom [ioError] with this [Error] wrapped around with a [Path] attached
     pub fn custom_ioerror_path<M, P>(kind: std::io::ErrorKind, msg: M, path: P) -> Self
@@ -115,6 +116,9 @@ pub enum ErrorEnum {
     /// Variant for unsupported sql types
     #[error("UnsupportedType: {0}")]
     UnsupportedType(String),
+    /// Variant for when "has_file_signature" is `false`
+    #[error("NoFileSignature: {0}")]
+    NoFileSignature(String),
 
     /// Variant for Other messages
     #[error("Other: {0}")]

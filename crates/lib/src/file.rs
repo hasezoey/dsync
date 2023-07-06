@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use crate::error::{IOErrorToError, Result};
+use crate::error::{Error, IOErrorToError, Result};
 
 pub struct MarkedFile {
     pub file_contents: String,
@@ -91,10 +91,12 @@ impl MarkedFile {
                 .starts_with(crate::parser::FILE_SIGNATURE)
     }
 
-    pub fn ensure_file_signature(&self) {
+    pub fn ensure_file_signature(&self) -> Result<()> {
         if !self.has_file_signature() {
-            panic!("Expected file '{path:#?}' to have file signature ('{sig}') -- you might be accidentally overwriting files that weren't generated!", path=self.path, sig=crate::parser::FILE_SIGNATURE)
+            return Err(Error::no_file_signature(format!("Expected file '{path:#?}' to have file signature ('{sig}') -- you might be accidentally overwriting files that weren't generated!", path=self.path, sig=crate::parser::FILE_SIGNATURE)));
         }
+
+        Ok(())
     }
 
     pub fn write(&self) -> Result<()> {

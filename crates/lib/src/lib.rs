@@ -189,7 +189,7 @@ pub fn generate_files(
         let mut table_generated_rs = MarkedFile::new(table_dir.join("generated.rs"))?;
         let mut table_mod_rs = MarkedFile::new(table_dir.join("mod.rs"))?;
 
-        table_generated_rs.ensure_file_signature();
+        table_generated_rs.ensure_file_signature()?;
         table_generated_rs.file_contents = table.generated_code.clone();
         table_generated_rs.write()?;
 
