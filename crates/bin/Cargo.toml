@@ -19,7 +19,7 @@ async = []
 clap = { version = "4.3", features = ["derive", "wrap_help"] }
 clap_complete = "4.3"
 anyhow = { version = "1", features = ["backtrace"] }
-libdsync-hasezoey = { path = "../lib" }
+libdsync-hasezoey = { path = "../lib", version = "0.1.0" }
 
 [[bin]]
 name = "dsync"
