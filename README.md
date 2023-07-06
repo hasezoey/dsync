@@ -56,7 +56,7 @@ For a complete example, see [`test/simple_table/schema.rs`](test/simple_table/sc
 1. Add this crate:
 
     ```sh
-    cargo add dsync
+    cargo add libdsync-hasezoey
     ```
 
 2. Create a new binary in your project which uses the crate (for example, `bin/dsync.rs`)
@@ -103,7 +103,7 @@ Setting up a custom binary allows you to completely customize the generation; ho
 (you'll have to make sure you keep it up-to-date by running this periodically):
 
 ```sh
-cargo install dsync 
+cargo install dsync-hasezoey
 ```
 
 **CLI Usage**
