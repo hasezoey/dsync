@@ -6,6 +6,19 @@ use std::{backtrace::Backtrace, io::Error as ioError, path::Path};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+/// Macro to not repeat having to do multiple implementations of a [ErrorInner] variant with the same string type
+macro_rules! fn_string {
+    ($fn_name:ident, $fortype:expr) => {
+        #[doc = concat!("Create a new [Self] as [", stringify!($fortype), "]")]
+        pub fn $fn_name<M>(msg: M) -> Self
+        where
+            M: Into<String>,
+        {
+            return Self::new($fortype(msg.into()));
+        }
+    };
+}
+
 /// Error type for libytdlr, contains a backtrace, wrapper around [ErrorInner]
 #[derive(Debug)]
 pub struct Error {
@@ -32,12 +45,11 @@ impl Error {
         return &self.backtrace;
     }
 
-    pub fn other<M>(msg: M) -> Self
-    where
-        M: Into<String>,
-    {
-        return Self::new(ErrorEnum::Other(msg.into()));
-    }
+    fn_string!(other, ErrorEnum::Other);
+    fn_string!(
+        unsupported_schema_format,
+        ErrorEnum::UnsupportedSchemaFormat
+    );
 
     /// Create a custom [ioError] with this [Error] wrapped around with a [Path] attached
     pub fn custom_ioerror_path<M, P>(kind: std::io::ErrorKind, msg: M, path: P) -> Self
@@ -96,6 +108,9 @@ pub enum ErrorEnum {
     /// TODO: replace with io::ErrorKind::NotADirectory once stable <https://github.com/rust-lang/rust/issues/86442>
     #[error("NotADirectory: {0}; Path: \"{1}\"")]
     NotADirectory(String, String),
+    /// Variant for unsupported diesel schema formats
+    #[error("UnsupportedSchemaFormat: {0}")]
+    UnsupportedSchemaFormat(String),
 
     /// Variant for Other messages
     #[error("Other: {0}")]

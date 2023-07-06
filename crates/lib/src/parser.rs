@@ -2,7 +2,7 @@ use inflector::Inflector;
 use syn::Ident;
 use syn::Item::Macro;
 
-use crate::{code, GenerationConfig, Result};
+use crate::{code, Error, GenerationConfig, Result};
 
 pub const FILE_SIGNATURE: &str = "/* This file is generated and managed by dsync */";
 
@@ -70,7 +70,7 @@ pub fn parse_and_generate_code(
 
             match macro_identifier.as_str() {
                 "table" => {
-                    let parsed_table = handle_table_macro(macro_item, config);
+                    let parsed_table = handle_table_macro(macro_item, config)?;
 
                     // make sure the table isn't ignored
                     let table_options = config.table(parsed_table.name.to_string().as_str());
@@ -79,7 +79,7 @@ pub fn parse_and_generate_code(
                     }
                 }
                 "joinable" => {
-                    let parsed_join = handle_joinable_macro(macro_item);
+                    let parsed_join = handle_joinable_macro(macro_item)?;
 
                     for table in tables.iter_mut() {
                         if parsed_join
@@ -107,7 +107,7 @@ pub fn parse_and_generate_code(
     Ok(tables)
 }
 
-fn handle_joinable_macro(macro_item: syn::ItemMacro) -> ParsedJoinMacro {
+fn handle_joinable_macro(macro_item: syn::ItemMacro) -> Result<ParsedJoinMacro> {
     // println!("joinable! macro: {:#?}", macro_item);
 
     let mut table1_name: Option<Ident> = None;
@@ -125,7 +125,9 @@ fn handle_joinable_macro(macro_item: syn::ItemMacro) -> ParsedJoinMacro {
             }
             proc_macro2::TokenTree::Group(group) => {
                 if table1_name.is_none() || table2_name.is_none() {
-                    panic!("Unsupported schema format! (encountered join column group too early)");
+                    return Err(Error::unsupported_schema_format(
+                        "encountered join column group too early",
+                    ));
                 } else {
                     table2_join_column = Some(group.stream().to_string());
                 }
@@ -134,17 +136,23 @@ fn handle_joinable_macro(macro_item: syn::ItemMacro) -> ParsedJoinMacro {
         }
     }
 
-    ParsedJoinMacro {
-        table1: table1_name
-            .expect("Unsupported schema format! (could not determine first join table name)"),
-        table2: table2_name
-            .expect("Unsupported schema format! (could not determine second join table name)"),
-        table1_columns: table2_join_column
-            .expect("Unsupported schema format! (could not determine join column name)"),
-    }
+    Ok(ParsedJoinMacro {
+        table1: table1_name.ok_or(Error::unsupported_schema_format(
+            "could not determine first join table name",
+        ))?,
+        table2: table2_name.ok_or(Error::unsupported_schema_format(
+            "could not determine second join table name",
+        ))?,
+        table1_columns: table2_join_column.ok_or(Error::unsupported_schema_format(
+            "could not determine join column name",
+        ))?,
+    })
 }
 
-fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> ParsedTableMacro {
+fn handle_table_macro(
+    macro_item: syn::ItemMacro,
+    config: &GenerationConfig,
+) -> Result<ParsedTableMacro> {
     let mut table_name_ident: Option<Ident> = None;
     let mut table_primary_key_idents: Vec<Ident> = vec![];
     let mut table_columns: Vec<ParsedColumnMacro> = vec![];
@@ -224,16 +232,30 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
                             proc_macro2::TokenTree::Punct(punct) => {
                                 let char = punct.as_char();
 
-                                if char == '-' || char == '>' || char == '#'  {
+                                if char == '-' || char == '>' || char == '#' {
                                     // nothing for arrow
                                     continue;
-                                } else if char == ',' && column_name.is_some() && column_type.is_some() {
+                                } else if char == ','
+                                    && column_name.is_some()
+                                    && column_type.is_some()
+                                {
                                     // end of column def!
 
                                     // add the column
                                     table_columns.push(ParsedColumnMacro {
-                                        name: column_name.expect("Unsupported schema format! (Invalid column name syntax)"),
-                                        ty: schema_type_to_rust_type(column_type.expect("Unsupported schema format! (Invalid column type syntax)").to_string(), config),
+                                        name: column_name.ok_or(
+                                            Error::unsupported_schema_format(
+                                                "Invalid column name syntax",
+                                            ),
+                                        )?,
+                                        ty: schema_type_to_rust_type(
+                                            column_type
+                                                .ok_or(Error::unsupported_schema_format(
+                                                    "Invalid column type syntax",
+                                                ))?
+                                                .to_string(),
+                                            config,
+                                        ),
                                         is_nullable: column_nullable,
                                         is_unsigned: column_unsigned,
                                     });
@@ -245,7 +267,11 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
                                     column_nullable = false;
                                 }
                             }
-                            _ => panic!("Unsupported schema format! (Invalid column definition token in diesel table macro)")
+                            _ => {
+                                return Err(Error::unsupported_schema_format(
+                                    "Invalid column definition token in diesel table macro",
+                                ))
+                            }
                         }
                     }
 
@@ -255,24 +281,30 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
                         || column_unsigned
                     {
                         // looks like a column was in the middle of being parsed, let's panic!
-                        panic!(
-                            "Unsupported schema format! (It seems a column was partially defined)"
-                        );
+                        return Err(Error::unsupported_schema_format(
+                            "It seems a column was partially defined",
+                        ));
                     }
                 } else {
-                    panic!("Unsupported schema format! (Invalid delimiter in diesel table macro group)")
+                    return Err(Error::unsupported_schema_format(
+                        "Invalid delimiter in diesel table macro group",
+                    ));
                 }
             }
             _ => {
-                panic!("Unsupported schema format! (Invalid token tree item in diesel table macro)")
+                return Err(Error::unsupported_schema_format(
+                    "Invalid token tree item in diesel table macro)",
+                ))
             }
         }
     }
 
-    ParsedTableMacro {
+    Ok(ParsedTableMacro {
         name: table_name_ident
             .clone()
-            .expect("Unsupported schema format! (Could not extract table name from schema file)"),
+            .ok_or(Error::unsupported_schema_format(
+                "Could not extract table name from schema file",
+            ))?,
         struct_name: table_name_ident
             .unwrap()
             .to_string()
@@ -284,7 +316,7 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
         generated_code: format!(
             "{FILE_SIGNATURE}\n\nFATAL ERROR: nothing was generated; this shouldn't be possible."
         ),
-    }
+    })
 }
 
 // A function to translate diesel schema types into rust types
