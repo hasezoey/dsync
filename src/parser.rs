@@ -152,7 +152,7 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
     let mut skip_until_semicolon = false;
 
     let mut skip_square_brackets = false;
-    
+
     for item in macro_item.mac.tokens.into_iter() {
         if skip_until_semicolon {
             if let proc_macro2::TokenTree::Punct(punct) = item {
@@ -170,9 +170,9 @@ fn handle_table_macro(macro_item: syn::ItemMacro, config: &GenerationConfig) -> 
                     "#" => {
                         skip_square_brackets = true;
                         continue;
-                    },
+                    }
                     _ => {}
-               }
+                }
             }
             proc_macro2::TokenTree::Ident(ident) => {
                 // skip any "use" statements
