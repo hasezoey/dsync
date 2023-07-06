@@ -158,7 +158,7 @@ pub fn generate_files(
     let output_dir = output_models_dir;
 
     let generated = generate_code(
-        std::fs::read_to_string(input).expect("Could not read schema file."),
+        std::fs::read_to_string(&input).attach_path_err(&input)?,
         config,
     )?;
 

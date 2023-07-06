@@ -64,7 +64,7 @@ pub fn parse_and_generate_code(
                 .path
                 .segments
                 .last()
-                .expect("could not read identifier for macro")
+                .ok_or(Error::other("could not read identifier for macro"))?
                 .ident
                 .to_string();
 
@@ -101,7 +101,7 @@ pub fn parse_and_generate_code(
     }
 
     for table in tables.iter_mut() {
-        table.generated_code = code::generate_for_table(table.clone(), config);
+        table.generated_code = code::generate_for_table(table.clone(), config)?;
     }
 
     Ok(tables)

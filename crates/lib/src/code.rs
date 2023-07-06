@@ -2,7 +2,7 @@ use indoc::indoc;
 use inflector::Inflector;
 
 use crate::parser::{ParsedTableMacro, FILE_SIGNATURE};
-use crate::{GenerationConfig, TableOptions};
+use crate::{GenerationConfig, Result, TableOptions};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum StructType {
@@ -262,7 +262,7 @@ fn build_table_fns(
     config: &GenerationConfig,
     create_struct: Struct,
     update_struct: Struct,
-) -> String {
+) -> Result<String> {
     let table_options = config.table(&table.name.to_string());
 
     let primary_column_name_and_type: Vec<(String, String)> = table
@@ -445,7 +445,7 @@ impl {struct_name} {{
 }"##,
     );
 
-    buffer
+    Ok(buffer)
 }
 
 fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String {
@@ -498,7 +498,7 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
     )
 }
 
-pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) -> String {
+pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) -> Result<String> {
     // first, we generate struct code
     let read_struct = Struct::new(StructType::Read, &table, config);
     let update_struct = Struct::new(StructType::Update, &table, config);
@@ -511,8 +511,10 @@ pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) ->
     structs.push('\n');
     structs.push_str(update_struct.code());
 
-    let functions = build_table_fns(&table, config, create_struct, update_struct);
+    let functions = build_table_fns(&table, config, create_struct, update_struct)?;
     let imports = build_imports(&table, config);
 
-    format!("{FILE_SIGNATURE}\n\n{imports}\n{structs}\n{functions}")
+    Ok(format!(
+        "{FILE_SIGNATURE}\n\n{imports}\n{structs}\n{functions}"
+    ))
 }
