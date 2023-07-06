@@ -63,12 +63,12 @@ For a complete example, see [`test/simple_table/schema.rs`](test/simple_table/sc
 
    ```rust
    use std::{collections::HashMap, path::PathBuf};
-   use dsync::{GenerationConfig, TableOptions};
+   use dsync_hasezoey::{GenerationConfig, TableOptions};
    
    pub fn main() {
        let dir = env!("CARGO_MANIFEST_DIR");
    
-       dsync::generate_files(
+       dsync_hasezoey::generate_files(
            PathBuf::from_iter([dir, "src/schema.rs"]), 
            PathBuf::from_iter([dir, "src/models"]), 
            GenerationConfig { /* ... your generation options ... */ }

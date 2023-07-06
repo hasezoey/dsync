@@ -69,7 +69,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dsync"
+name = "dsync-hasezoey"
 version = "0.0.13"
 dependencies = [
  "Inflector",

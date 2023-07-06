@@ -1,4 +1,4 @@
-use dsync::{GenerationConfig, TableOptions};
+use dsync_hasezoey::{GenerationConfig, TableOptions};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -94,7 +94,7 @@ fn main() {
         default_table_options = default_table_options.disable_serde();
     }
 
-    dsync::generate_files(
+    dsync_hasezoey::generate_files(
         args.input,
         args.output,
         GenerationConfig {
