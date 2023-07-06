@@ -32,17 +32,17 @@ pub struct Error {
 impl Error {
     /// Construct a new [Error] instance based on [ErrorInner]
     pub fn new(source: ErrorEnum) -> Self {
-        return Self {
+        Self {
             source,
             #[cfg(feature = "backtrace")]
             backtrace: Backtrace::capture(),
-        };
+        }
     }
 
     #[cfg(feature = "backtrace")]
     /// Get the backtrace that is stored
     pub fn get_backtrace(&self) -> &Backtrace {
-        return &self.backtrace;
+        &self.backtrace
     }
 
     fn_string!(other, ErrorEnum::Other);
@@ -79,7 +79,7 @@ impl Error {
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        return self.source.fmt(f);
+        self.source.fmt(f)
     }
 }
 
@@ -95,7 +95,7 @@ where
     T: Into<ErrorEnum>,
 {
     fn from(value: T) -> Self {
-        return Self::new(value.into());
+        Self::new(value.into())
     }
 }
 
@@ -128,7 +128,7 @@ pub enum ErrorEnum {
 /// Helper function to keep consistent formatting
 #[inline]
 fn format_path(msg: String) -> String {
-    return format!("Path \"{}\"", msg);
+    format!("Path \"{}\"", msg)
 }
 
 /// Trait to map [std::io::Error] into [Error]
@@ -152,7 +152,7 @@ impl<T> IOErrorToError<T> for std::result::Result<T, std::io::Error> {
     }
 
     fn attach_path_msg<P: AsRef<Path>, M: AsRef<str>>(self, path: P, msg: M) -> Result<T> {
-        return match self {
+        match self {
             Ok(v) => Ok(v),
             Err(e) => Err(crate::Error::new(ErrorEnum::IoError(
                 e,
@@ -162,6 +162,6 @@ impl<T> IOErrorToError<T> for std::result::Result<T, std::io::Error> {
                     path = format_path(path.as_ref().to_string_lossy().to_string())
                 ),
             ))),
-        };
+        }
     }
 }
