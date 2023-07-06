@@ -255,7 +255,7 @@ fn handle_table_macro(
                                                 ))?
                                                 .to_string(),
                                             config,
-                                        ),
+                                        )?,
                                         is_nullable: column_nullable,
                                         is_unsigned: column_unsigned,
                                     });
@@ -326,11 +326,11 @@ fn handle_table_macro(
 //
 // The docs page for sql_types is comprehensive but it hides some alias types like Int4, Float8, etc.:
 // https://docs.rs/diesel/latest/diesel/sql_types/index.html
-fn schema_type_to_rust_type(schema_type: String, config: &GenerationConfig) -> String {
-    match schema_type.to_lowercase().as_str() {
-        "unsigned" => panic!("Unsigned types are not yet supported, please open an issue if you need this feature!"), // TODO: deal with this later
-        "inet" => panic!("Unsigned types are not yet supported, please open an issue if you need this feature!"), // TODO: deal with this later
-        "cidr" => panic!("Unsigned types are not yet supported, please open an issue if you need this feature!"), // TODO: deal with this later
+fn schema_type_to_rust_type(schema_type: String, config: &GenerationConfig) -> Result<String> {
+    Ok(match schema_type.to_lowercase().as_str() {
+        "unsigned" => return Err(Error::unsupported_type("Unsigned types are not yet supported, please open an issue if you need this feature!")), // TODO: deal with this later
+        "inet" => return Err(Error::unsupported_type("Unsigned types are not yet supported, please open an issue if you need this feature!")), // TODO: deal with this later
+        "cidr" => return Err(Error::unsupported_type("Unsigned types are not yet supported, please open an issue if you need this feature!")), // TODO: deal with this later
 
         // boolean
         "bool" => "bool",
@@ -407,7 +407,7 @@ fn schema_type_to_rust_type(schema_type: String, config: &GenerationConfig) -> S
             let schema_path = &config.schema_path;
             // return the schema type if no type is found (this means generation is broken for this particular schema)
             let _type = format!("{schema_path}sql_types::{schema_type}");
-            return _type;
+            return Ok(_type);
         }
-    }.to_string()
+    }.to_string())
 }

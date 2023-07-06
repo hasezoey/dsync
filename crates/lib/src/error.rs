@@ -50,6 +50,7 @@ impl Error {
         unsupported_schema_format,
         ErrorEnum::UnsupportedSchemaFormat
     );
+    fn_string!(unsupported_type, ErrorEnum::UnsupportedType);
 
     /// Create a custom [ioError] with this [Error] wrapped around with a [Path] attached
     pub fn custom_ioerror_path<M, P>(kind: std::io::ErrorKind, msg: M, path: P) -> Self
@@ -111,6 +112,9 @@ pub enum ErrorEnum {
     /// Variant for unsupported diesel schema formats
     #[error("UnsupportedSchemaFormat: {0}")]
     UnsupportedSchemaFormat(String),
+    /// Variant for unsupported sql types
+    #[error("UnsupportedType: {0}")]
+    UnsupportedType(String),
 
     /// Variant for Other messages
     #[error("Other: {0}")]
