@@ -153,3 +153,16 @@ This Fork Merged:
 Also changes done that were not a Pull request:
 
 - Some markdown style changes according to markdownlint
+
+## FAQ
+
+### sqlite `get_result` `DoesNotSupportReturningClause`
+
+If you get a error like the following, then the fix is to add feature `returning_clauses_for_sqlite_3_35` to the diesel dependency
+
+```txt
+75   |             .get_result(db)
+     |              ---------- ^^ the trait `QueryFragment<Sqlite, DoesNotSupportReturningClause>` is not implemented for `ReturningClause<(sql_schema::media_types::columns::_id, sql_schema::media_types::columns::name)>`
+     |              |
+     |              required by a bound introduced by this call
+```
