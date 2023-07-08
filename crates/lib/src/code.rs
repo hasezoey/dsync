@@ -562,6 +562,6 @@ pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) ->
     let imports = build_imports(&table, config);
 
     Ok(format!(
-        "{FILE_SIGNATURE}\n\n{imports}\n{structs}\n{functions}"
+        "{FILE_SIGNATURE}\n\n{imports}\n{structs}\n{functions}\n"
     ))
 }

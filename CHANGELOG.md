@@ -9,6 +9,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
   - remove converting struct names with `to_singular`
 - simplify implementation for how struct derives are generated (order of derives has changed)
 - add option `once-common-structs` to only generate common structs once
+- always end model files with a empty new line
 
 ## 0.1.0
 
