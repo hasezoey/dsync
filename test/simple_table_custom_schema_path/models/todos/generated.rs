@@ -35,13 +35,18 @@ pub struct UpdateTodos {
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
 }
 
+/// Result of a `.paginate` function
 #[derive(Debug, Serialize)]
 pub struct PaginationResult<T> {
+    /// Result items from the current page
     pub items: Vec<T>,
+    /// Count of how many items there are in total
     pub total_items: i64,
-    /// 0-based index
+    /// Current page, 0-based index
     pub page: i64,
+    /// Size of a page
     pub page_size: i64,
+    /// Number of pages in total
     pub num_pages: i64,
 }
 
