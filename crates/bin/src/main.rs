@@ -71,7 +71,7 @@ fn actual_main() -> anyhow::Result<()> {
             schema_path: args.schema_path,
             model_path: args.model_path,
             once_common_structs: args.once_common_structs,
-            single_model_file: args.single_model_file
+            single_model_file: args.single_model_file,
         },
     )?;
 

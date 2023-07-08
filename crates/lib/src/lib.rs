@@ -200,7 +200,9 @@ pub fn generate_files(
         common_file.file_contents = {
             let mut tmp = String::from(FILE_SIGNATURE);
             tmp.push('\n');
-            tmp.push_str(&code::generate_common_structs(&config.default_table_options));
+            tmp.push_str(&code::generate_common_structs(
+                &config.default_table_options,
+            ));
             tmp
         };
         common_file.write()?;
@@ -211,7 +213,7 @@ pub fn generate_files(
     // pass 1: add code for new tables
     for table in generated.iter() {
         if config.once_common_structs && table.name == "common" {
-            return Err(Error::other("Cannot have a table named \"common\" while having option \"once_common_structs\" enabled"))
+            return Err(Error::other("Cannot have a table named \"common\" while having option \"once_common_structs\" enabled"));
         }
 
         let table_name = table.name.to_string();
@@ -240,7 +242,14 @@ pub fn generate_files(
         let mut table_generated_rs = MarkedFile::new(table_dir.join(table_file_name))?;
 
         table_generated_rs.ensure_file_signature()?;
-        table_generated_rs.file_contents = table.generated_code.as_ref().ok_or(Error::other(format!("Expected code for table \"{}\" to be generated", table.struct_name)))?.clone();
+        table_generated_rs.file_contents = table
+            .generated_code
+            .as_ref()
+            .ok_or(Error::other(format!(
+                "Expected code for table \"{}\" to be generated",
+                table.struct_name
+            )))?
+            .clone();
         table_generated_rs.write()?;
 
         if !config.single_model_file {
@@ -248,7 +257,7 @@ pub fn generate_files(
 
             table_mod_rs.ensure_mod_stmt("generated");
             table_mod_rs.ensure_use_stmt("generated::*");
-            table_mod_rs.write()?;    
+            table_mod_rs.write()?;
         }
 
         mod_rs.ensure_mod_stmt(table.name.to_string().as_str());

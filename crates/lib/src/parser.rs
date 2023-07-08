@@ -1,4 +1,4 @@
-use heck::{ToPascalCase};
+use heck::ToPascalCase;
 use syn::Ident;
 use syn::Item::Macro;
 
@@ -241,7 +241,7 @@ fn handle_table_macro(
                                     // parse some extra information from the bracket group
                                     // like the actual column name
                                     if let Some((name, value)) = parse_diesel_attr_group(&group) {
-                                        if name.to_string() == "sql_name" {
+                                        if name == "sql_name" {
                                             actual_column_name = Some(value);
                                         }
                                     }
@@ -278,8 +278,10 @@ fn handle_table_macro(
                                     let rust_column_name_checked = rust_column_name.ok_or(
                                         Error::unsupported_schema_format(
                                             "Invalid column name syntax",
-                                        ))?;
-                                    let column_name = actual_column_name.unwrap_or(rust_column_name_checked.to_string());
+                                        ),
+                                    )?;
+                                    let column_name = actual_column_name
+                                        .unwrap_or(rust_column_name_checked.to_string());
 
                                     // add the column
                                     table_columns.push(ParsedColumnMacro {
@@ -294,7 +296,7 @@ fn handle_table_macro(
                                         )?,
                                         is_nullable: column_nullable,
                                         is_unsigned: column_unsigned,
-                                        column_name: column_name,
+                                        column_name,
                                     });
 
                                     // reset the properties
@@ -366,7 +368,7 @@ fn parse_diesel_attr_group(group: &proc_macro2::Group) -> Option<(Ident, String)
         proc_macro2::TokenTree::Ident(ident) => ident,
         _ => return None,
     };
-    
+
     let punct = match token_stream.next()? {
         proc_macro2::TokenTree::Punct(punct) => punct,
         _ => return None,
@@ -385,10 +387,10 @@ fn parse_diesel_attr_group(group: &proc_macro2::Group) -> Option<(Ident, String)
     let mut value = value.to_string();
 
     if value.starts_with('"') && value.ends_with('"') {
-        value = String::from(&value[1..value.len()-1]); // safe char boundaries because '"' is only one byte long
+        value = String::from(&value[1..value.len() - 1]); // safe char boundaries because '"' is only one byte long
     }
 
-    return Some((option_name, value));
+    Some((option_name, value))
 }
 
 /// A function to translate diesel schema types into rust types

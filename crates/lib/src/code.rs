@@ -93,7 +93,7 @@ impl<'a> Struct<'a> {
         obj.render();
         obj
     }
-    
+
     pub fn has_code(&self) -> bool {
         self.rendered_code.is_some()
     }
@@ -134,11 +134,15 @@ impl<'a> Struct<'a> {
             derives.push(Self::DERIVE_Serde_Deserialize);
         }
 
-        if !self.opts.get_only_necessary_derives() || (self.opts.get_only_necessary_derives() && self.ty == StructType::Read) {
+        if !self.opts.get_only_necessary_derives()
+            || (self.opts.get_only_necessary_derives() && self.ty == StructType::Read)
+        {
             derives.push(Self::DERIVE_Queryable);
         }
-        
-        if !self.opts.get_only_necessary_derives() || (self.opts.get_only_necessary_derives() && self.ty == StructType::Create) {
+
+        if !self.opts.get_only_necessary_derives()
+            || (self.opts.get_only_necessary_derives() && self.ty == StructType::Create)
+        {
             derives.push(Self::DERIVE_Insertable);
         }
 
@@ -226,7 +230,7 @@ impl<'a> Struct<'a> {
                     name,
                     base_type,
                     is_optional,
-                    column_name: c.column_name.clone()
+                    column_name: c.column_name.clone(),
                 }
             })
             .collect()
@@ -261,16 +265,24 @@ impl<'a> Struct<'a> {
                 field.base_type.clone()
             };
 
-            lines.push(format!(r#"    /// Field Representing column `{column_name}`
-    pub {field_name}: {field_type},"#, column_name = field.column_name
-        ));
+            lines.push(format!(
+                r#"    /// Field Representing column `{column_name}`
+    pub {field_name}: {field_type},"#,
+                column_name = field.column_name
+            ));
         }
 
         let table_name = &table.name;
         let struct_doc = match self.ty {
             StructType::Read => format!("/// Struct representing a row for table `{table_name}`\n"),
-            StructType::Update => format!("/// Update struct for [`{struct_name}`] on table `{table_name}`\n", struct_name = table.struct_name),
-            StructType::Create => format!("/// Create struct for [`{struct_name}`] on table `{table_name}`\n", struct_name = table.struct_name),
+            StructType::Update => format!(
+                "/// Update struct for [`{struct_name}`] on table `{table_name}`\n",
+                struct_name = table.struct_name
+            ),
+            StructType::Create => format!(
+                "/// Create struct for [`{struct_name}`] on table `{table_name}`\n",
+                struct_name = table.struct_name
+            ),
         };
 
         let struct_code = format!(
@@ -518,19 +530,16 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
 
     #[cfg(feature = "async")]
     let table_options = config.table(&table.name.to_string());
-    for belong in table
-        .foreign_keys
-        .iter()
-        .map(|fk| {
-            format!(
-                "use {model_path}{foreign_table_name_model}::{singular_struct_name};\n",
-                foreign_table_name_model = fk.0.to_string().to_snake_case().to_lowercase(),
-                singular_struct_name = fk.0.to_string().to_pascal_case(),
-                model_path = config.model_path
-            )
-        }) {
-            imports_buffer.push_str(&belong);
-        }
+    for belong in table.foreign_keys.iter().map(|fk| {
+        format!(
+            "use {model_path}{foreign_table_name_model}::{singular_struct_name};\n",
+            foreign_table_name_model = fk.0.to_string().to_snake_case().to_lowercase(),
+            singular_struct_name = fk.0.to_string().to_pascal_case(),
+            model_path = config.model_path
+        )
+    }) {
+        imports_buffer.push_str(&belong);
+    }
     #[cfg(feature = "async")]
     if table_options.get_async() {
         imports_buffer.push_str("use diesel_async::RunQueryDsl;\n");
@@ -562,11 +571,11 @@ pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) ->
     let mut structs = String::from(read_struct.code());
     if create_struct.has_code() {
         structs.push('\n');
-        structs.push_str(create_struct.code());    
+        structs.push_str(create_struct.code());
     }
     if update_struct.has_code() {
         structs.push('\n');
-        structs.push_str(update_struct.code());    
+        structs.push_str(update_struct.code());
     }
 
     let functions = build_table_fns(&table, config, create_struct, update_struct)?;
