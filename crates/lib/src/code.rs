@@ -246,12 +246,12 @@ impl<'a> Struct<'a> {
 
         let fields = self.fields();
         let mut lines = vec![];
-        for f in fields.iter() {
-            let field_name = &f.name;
-            let field_type = if f.is_optional {
-                format!("Option<{}>", f.base_type)
+        for field in fields.iter() {
+            let field_name = &field.name;
+            let field_type = if field.is_optional {
+                format!("Option<{}>", field.base_type)
             } else {
-                f.base_type.clone()
+                field.base_type.clone()
             };
 
             lines.push(format!(r#"    pub {field_name}: {field_type},"#));
