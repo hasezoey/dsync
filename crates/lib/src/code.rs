@@ -363,11 +363,11 @@ fn build_table_fns(
 
     if !config.once_common_structs {
         buffer.push_str(&generate_common_structs(&table_options));
+        buffer.push('\n');
     }
 
     buffer.push_str(&format!(
-        r##"
-impl {struct_name} {{
+        r##"impl {struct_name} {{
 "##
     ));
 
@@ -463,15 +463,14 @@ impl {struct_name} {{
 pub fn generate_common_structs(table_options: &TableOptions<'_>) -> String {
     #[cfg(feature = "tsync")]
     let tsync = match table_options.get_tsync() {
-        true => "#[tsync::tsync]",
+        true => "#[tsync::tsync]\n",
         false => "",
     };
     #[cfg(not(feature = "tsync"))]
     let tsync = "";
 
     format!(
-        r##"{tsync}
-#[derive(Debug, {serde_derive})]
+        r##"{tsync}#[derive(Debug, {serde_derive})]
 pub struct PaginationResult<T> {{
     pub items: Vec<T>,
     pub total_items: i64,

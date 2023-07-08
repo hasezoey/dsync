@@ -29,7 +29,6 @@ pub struct UpdateTableB {
     pub link: Option<i32>,
 }
 
-
 impl TableB {
 
     pub fn create(db: &mut Connection, item: &CreateTableB) -> QueryResult<Self> {

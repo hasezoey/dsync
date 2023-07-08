@@ -10,6 +10,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 - simplify implementation for how struct derives are generated (order of derives has changed)
 - add option `once-common-structs` to only generate common structs once
 - always end model files with a empty new line
+- have less unnecessary new-lines
 
 ## 0.1.0
 

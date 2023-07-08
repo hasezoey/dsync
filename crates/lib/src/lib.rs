@@ -197,6 +197,7 @@ pub fn generate_files(
         common_file.ensure_file_signature()?;
         common_file.file_contents = {
             let mut tmp = String::from(FILE_SIGNATURE);
+            tmp.push('\n');
             tmp.push_str(&code::generate_common_structs(&config.default_table_options));
             tmp
         };

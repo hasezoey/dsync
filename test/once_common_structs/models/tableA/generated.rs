@@ -22,7 +22,6 @@ pub struct CreateTableA {
 }
 
 
-
 impl TableA {
 
     pub fn create(db: &mut Connection, item: &CreateTableA) -> QueryResult<Self> {
