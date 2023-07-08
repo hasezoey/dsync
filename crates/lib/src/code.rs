@@ -4,7 +4,7 @@ use inflector::Inflector;
 use crate::parser::{ParsedTableMacro, FILE_SIGNATURE};
 use crate::{GenerationConfig, Result, TableOptions};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum StructType {
     Read,
     // this struct type maps directly to a database row
@@ -44,6 +44,7 @@ impl StructType {
     }
 }
 
+#[derive(Debug)]
 struct Struct<'a> {
     identifier: String,
     ty: StructType,
