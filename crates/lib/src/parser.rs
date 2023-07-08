@@ -11,22 +11,31 @@ pub const FILE_SIGNATURE: &str = "/* This file is generated and managed by dsync
 
 #[derive(Debug, Clone)]
 pub struct ParsedColumnMacro {
+    /// Rust type to use
     pub ty: String,
+    /// Rust name of the column
     pub name: Ident,
     pub is_nullable: bool,
     pub is_unsigned: bool,
 }
 
+/// Struct for a parsed diesel schema
 #[derive(Debug, Clone)]
 pub struct ParsedTableMacro {
+    /// Name of the table
     pub name: Ident,
+    /// Struct name to use for generation
     pub struct_name: String,
+    /// All parsed columns
     pub columns: Vec<ParsedColumnMacro>,
+    /// All Primary key column names as used in the diesel schema
     pub primary_key_columns: Vec<Ident>,
+    /// All foreign key relations (foreign_table_name, local_join_column)
     pub foreign_keys: Vec<(
         ForeignTableName,
         JoinColumn, /* this is the column from this table which maps to the foreign table's primary key*/
     )>,
+    /// Final Generated code
     pub generated_code: String,
 }
 
@@ -42,13 +51,18 @@ impl ParsedTableMacro {
 type ForeignTableName = Ident;
 type JoinColumn = String;
 
+/// Parsed representation of the `diesel::joinable!` macro
 #[derive(Debug, Clone)]
 pub struct ParsedJoinMacro {
+    /// Table with the foreign key
     pub table1: Ident,
+    /// Table referenced to
     pub table2: Ident,
+    /// Column with the reference (rust name)
     pub table1_columns: String,
 }
 
+/// Try to parse a diesel schema file
 pub fn parse_and_generate_code(
     schema_file_contents: String,
     config: &GenerationConfig,
@@ -107,6 +121,7 @@ pub fn parse_and_generate_code(
     Ok(tables)
 }
 
+/// Try to parse a "diesel::joinable!" macro
 fn handle_joinable_macro(macro_item: syn::ItemMacro) -> Result<ParsedJoinMacro> {
     // println!("joinable! macro: {:#?}", macro_item);
 
@@ -149,6 +164,7 @@ fn handle_joinable_macro(macro_item: syn::ItemMacro) -> Result<ParsedJoinMacro> 
     })
 }
 
+/// Try to parse a "diesel::table!" macro
 fn handle_table_macro(
     macro_item: syn::ItemMacro,
     config: &GenerationConfig,
@@ -319,13 +335,13 @@ fn handle_table_macro(
     })
 }
 
-// A function to translate diesel schema types into rust types
-//
-// reference: https://github.com/diesel-rs/diesel/blob/master/diesel/src/sql_types/mod.rs
-// exact reference; https://github.com/diesel-rs/diesel/blob/292ac5c0ed6474f96734ba2e99b95b442064f69c/diesel/src/mysql/types/mod.rs
-//
-// The docs page for sql_types is comprehensive but it hides some alias types like Int4, Float8, etc.:
-// https://docs.rs/diesel/latest/diesel/sql_types/index.html
+/// A function to translate diesel schema types into rust types
+///
+/// reference: https://github.com/diesel-rs/diesel/blob/master/diesel/src/sql_types/mod.rs
+/// exact reference; https://github.com/diesel-rs/diesel/blob/292ac5c0ed6474f96734ba2e99b95b442064f69c/diesel/src/mysql/types/mod.rs
+///
+/// The docs page for sql_types is comprehensive but it hides some alias types like Int4, Float8, etc.:
+/// https://docs.rs/diesel/latest/diesel/sql_types/index.html
 fn schema_type_to_rust_type(schema_type: String, config: &GenerationConfig) -> Result<String> {
     Ok(match schema_type.to_lowercase().as_str() {
         "unsigned" => return Err(Error::unsupported_type("Unsigned types are not yet supported, please open an issue if you need this feature!")), // TODO: deal with this later
