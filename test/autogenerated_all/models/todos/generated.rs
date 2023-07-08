@@ -1,10 +1,8 @@
 /* This file is generated and managed by dsync */
 
 use crate::diesel::*;
-use crate::schema::*;
-use diesel::QueryResult;
 use serde::{Deserialize, Serialize};
-
+use crate::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 

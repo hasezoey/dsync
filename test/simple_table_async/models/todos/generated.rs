@@ -1,11 +1,9 @@
 /* This file is generated and managed by dsync */
 
 use crate::diesel::*;
-use crate::schema::*;
-use diesel::QueryResult;
-use serde::{Deserialize, Serialize};
 use diesel_async::RunQueryDsl;
-
+use serde::{Deserialize, Serialize};
+use crate::schema::*;
 
 type Connection = diesel_async::pooled_connection::deadpool::Object<diesel_async::AsyncPgConnection>;
 

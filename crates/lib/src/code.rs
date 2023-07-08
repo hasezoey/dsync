@@ -490,56 +490,41 @@ pub struct PaginationResult<T> {{
 
 /// Generate all the imports that are required
 fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String {
+    let mut imports_buffer = String::from("use crate::diesel::*;\n");
+
     #[cfg(feature = "async")]
     let table_options = config.table(&table.name.to_string());
-    let belongs_imports = table
+    for belong in table
         .foreign_keys
         .iter()
         .map(|fk| {
             format!(
-                "use {model_path}{foreign_table_name_model}::{singular_struct_name};",
+                "use {model_path}{foreign_table_name_model}::{singular_struct_name};\n",
                 foreign_table_name_model = fk.0.to_string().to_snake_case().to_lowercase(),
                 singular_struct_name = fk.0.to_string().to_pascal_case(),
                 model_path = config.model_path
             )
-        })
-        .collect::<Vec<String>>()
-        .join("\n");
+        }) {
+            imports_buffer.push_str(&belong);
+        }
     #[cfg(feature = "async")]
-    let async_imports = if table_options.get_async() {
-        "\nuse diesel_async::RunQueryDsl;"
-    } else {
-        ""
+    if table_options.get_async() {
+        imports_buffer.push_str("use diesel_async::RunQueryDsl;\n");
     };
-    #[cfg(not(feature = "async"))]
-    let async_imports = "";
-    let serde_imports = if config.default_table_options.get_serde() {
-        "use serde::{Deserialize, Serialize};"
-    } else {
-        ""
+    if config.default_table_options.get_serde() {
+        imports_buffer.push_str("use serde::{Deserialize, Serialize};\n");
     };
-    let common_structs_imports = if config.once_common_structs {
-        format!("\nuse {}common::*;", config.model_path)
-    } else {
-        "".into()
+    if config.once_common_structs {
+        imports_buffer.push_str(&format!("use {}common::*;\n", config.model_path));
     };
 
-    let mut schema_path = config.schema_path.clone();
-    schema_path.push('*');
+    imports_buffer.push_str(&format!("use {}*;", config.schema_path));
+
     format!(
-        "use crate::diesel::*;
-use {schema_path};{common_structs_imports}
-use diesel::QueryResult;
-{serde_imports}{async_imports}
-{belongs_imports}
+        "{imports_buffer}
 
 type Connection = {connection_type};\n",
-        common_structs_imports = common_structs_imports,
         connection_type = config.connection_type,
-        belongs_imports = belongs_imports,
-        async_imports = async_imports,
-        serde_imports = serde_imports,
-        schema_path = schema_path
     )
 }
 
