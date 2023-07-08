@@ -49,7 +49,7 @@ async fn demo(db: Connection) {
 }
 ```
 
-For a complete example, see [`test/simple_table/schema.rs`](test/simple_table/schema.rs) which generates all the code in [`test/simple_schema/models`](test/simple_table/models).
+For more examples, look into the [`test/`](test/) folder, where in `test.sh` the options used are listed, `schema.rs` is the diesel schema and all other files are output from dsync
 
 ## Usage
 
