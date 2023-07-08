@@ -82,4 +82,8 @@ pub struct MainOptions {
     /// Only generate common structs once and put them in a common file
     #[arg(long = "once-common-structs")]
     pub once_common_structs: bool,
+
+    /// Only generate a single model file instead of a folder with a "mod.rs" and a "generated.rs"
+    #[arg(long = "single-model-file")]
+    pub single_model_file: bool,
 }

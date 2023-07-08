@@ -143,6 +143,8 @@ pub struct GenerationConfig<'a> {
     pub model_path: String,
     /// Only generate common structs once and put them in a common file
     pub once_common_structs: bool,
+    /// Only generate a single model file instead of a folder with a "mod.rs" and a "generated.rs"
+    pub single_model_file: bool,
 }
 
 impl GenerationConfig<'_> {
@@ -212,7 +214,12 @@ pub fn generate_files(
             return Err(Error::other("Cannot have a table named \"common\" while having option \"once_common_structs\" enabled"))
         }
 
-        let table_dir = output_dir.join(table.name.to_string());
+        let table_name = table.name.to_string();
+        let table_dir = if config.single_model_file {
+            output_dir.clone()
+        } else {
+            output_dir.join(&table_name)
+        };
 
         if !table_dir.exists() {
             std::fs::create_dir(&table_dir).attach_path_err(&table_dir)?;
@@ -222,16 +229,27 @@ pub fn generate_files(
             return Err(Error::not_a_directory("Expected a directory", table_dir));
         }
 
-        let mut table_generated_rs = MarkedFile::new(table_dir.join("generated.rs"))?;
-        let mut table_mod_rs = MarkedFile::new(table_dir.join("mod.rs"))?;
+        let table_file_name = if config.single_model_file {
+            let mut table_name = table_name; // avoid a clone, because its the last usage of "table_name"
+            table_name.push_str(".rs");
+            table_name
+        } else {
+            "generated.rs".into()
+        };
+
+        let mut table_generated_rs = MarkedFile::new(table_dir.join(table_file_name))?;
 
         table_generated_rs.ensure_file_signature()?;
         table_generated_rs.file_contents = table.generated_code.as_ref().ok_or(Error::other(format!("Expected code for table \"{}\" to be generated", table.struct_name)))?.clone();
         table_generated_rs.write()?;
 
-        table_mod_rs.ensure_mod_stmt("generated");
-        table_mod_rs.ensure_use_stmt("generated::*");
-        table_mod_rs.write()?;
+        if !config.single_model_file {
+            let mut table_mod_rs = MarkedFile::new(table_dir.join("mod.rs"))?;
+
+            table_mod_rs.ensure_mod_stmt("generated");
+            table_mod_rs.ensure_use_stmt("generated::*");
+            table_mod_rs.write()?;    
+        }
 
         mod_rs.ensure_mod_stmt(table.name.to_string().as_str());
     }
