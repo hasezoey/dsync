@@ -244,28 +244,6 @@ impl<'a> Struct<'a> {
             .collect::<Vec<String>>()
             .join(" ");
 
-        let struct_code = format!(
-            "{tsync_attr}{derive_attr}
-#[diesel(table_name={table_name}{primary_key}{belongs_to})]
-pub struct {struct_name} {{
-$COLUMNS$
-}}\n",
-            tsync_attr = self.attr_tsync(),
-            derive_attr = self.attr_derive(),
-            table_name = table.name,
-            struct_name = ty.format(table.struct_name.as_str()),
-            primary_key = if ty != StructType::Read {
-                "".to_string()
-            } else {
-                format!(", primary_key({})", primary_keys.join(","))
-            },
-            belongs_to = if ty != StructType::Read {
-                "".to_string()
-            } else {
-                belongs_to
-            }
-        );
-
         let fields = self.fields();
         let mut lines = vec![];
         for f in fields.iter() {
@@ -279,12 +257,35 @@ $COLUMNS$
             lines.push(format!(r#"    pub {field_name}: {field_type},"#));
         }
 
+        let struct_code = format!(
+            "{tsync_attr}{derive_attr}
+#[diesel(table_name={table_name}{primary_key}{belongs_to})]
+pub struct {struct_name} {{
+{lines}
+}}\n",
+            tsync_attr = self.attr_tsync(),
+            derive_attr = self.attr_derive(),
+            table_name = table.name,
+            lines = lines.join("\n"),
+            struct_name = ty.format(table.struct_name.as_str()),
+            primary_key = if ty != StructType::Read {
+                "".to_string()
+            } else {
+                format!(", primary_key({})", primary_keys.join(","))
+            },
+            belongs_to = if ty != StructType::Read {
+                "".to_string()
+            } else {
+                belongs_to
+            }
+        );
+
         if fields.is_empty() {
             self.has_fields = Some(false);
             self.rendered_code = Some("".to_string());
         } else {
             self.has_fields = Some(true);
-            self.rendered_code = Some(struct_code.replace("$COLUMNS$", &lines.join("\n")));
+            self.rendered_code = Some(struct_code);
         }
     }
 }
