@@ -91,6 +91,10 @@ impl<'a> Struct<'a> {
         obj.render();
         obj
     }
+    
+    pub fn has_code(&self) -> bool {
+        self.rendered_code.is_some()
+    }
 
     pub fn code(&self) -> &str {
         self.rendered_code.as_deref().unwrap_or_default()
@@ -536,11 +540,11 @@ pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) ->
     let create_struct = Struct::new(StructType::Create, &table, config);
 
     let mut structs = String::from(read_struct.code());
-    if create_struct.rendered_code.is_some() {
+    if create_struct.has_code() {
         structs.push('\n');
         structs.push_str(create_struct.code());    
     }
-    if update_struct.rendered_code.is_some() {
+    if update_struct.has_code() {
         structs.push('\n');
         structs.push_str(update_struct.code());    
     }
