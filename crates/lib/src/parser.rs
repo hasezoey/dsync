@@ -123,8 +123,6 @@ pub fn parse_and_generate_code(
 
 /// Try to parse a "diesel::joinable!" macro
 fn handle_joinable_macro(macro_item: syn::ItemMacro) -> Result<ParsedJoinMacro> {
-    // println!("joinable! macro: {:#?}", macro_item);
-
     let mut table1_name: Option<Ident> = None;
     let mut table2_name: Option<Ident> = None;
     let mut table2_join_column: Option<String> = None;
@@ -214,7 +212,6 @@ fn handle_table_macro(
 
                 if group.delimiter() == proc_macro2::Delimiter::Parenthesis {
                     // primary keys group
-                    // println!("GROUP-keys {:#?}", group);
                     for key_token in group.stream().into_iter() {
                         if let proc_macro2::TokenTree::Ident(ident) = key_token {
                             table_primary_key_idents.push(ident)
@@ -222,7 +219,6 @@ fn handle_table_macro(
                     }
                 } else if group.delimiter() == proc_macro2::Delimiter::Brace {
                     // columns group
-                    // println!("GROUP-cols {:#?}", group);
 
                     let mut column_name: Option<Ident> = None;
                     let mut column_type: Option<Ident> = None;
