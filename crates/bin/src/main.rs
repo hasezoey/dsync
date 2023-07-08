@@ -70,6 +70,7 @@ fn actual_main() -> anyhow::Result<()> {
             connection_type: args.connection_type,
             schema_path: args.schema_path,
             model_path: args.model_path,
+            once_common_structs: args.once_common_structs
         },
     )?;
 

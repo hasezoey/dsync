@@ -141,6 +141,8 @@ pub struct GenerationConfig<'a> {
     /// model path to use
     /// Example: "crate::models::"
     pub model_path: String,
+    /// Only generate common structs once and put them in a common file
+    pub once_common_structs: bool,
 }
 
 impl GenerationConfig<'_> {
@@ -158,9 +160,9 @@ impl GenerationConfig<'_> {
 /// Model is returned and not saved to disk
 pub fn generate_code(
     diesel_schema_file_contents: String,
-    config: GenerationConfig,
+    config: &GenerationConfig,
 ) -> Result<Vec<ParsedTableMacro>> {
-    parser::parse_and_generate_code(diesel_schema_file_contents, &config)
+    parser::parse_and_generate_code(diesel_schema_file_contents, config)
 }
 
 /// Generate all models for a given diesel schema input file
@@ -175,7 +177,7 @@ pub fn generate_files(
 
     let generated = generate_code(
         std::fs::read_to_string(&input).attach_path_err(&input)?,
-        config,
+        &config,
     )?;
 
     if !output_dir.exists() {
@@ -190,8 +192,25 @@ pub fn generate_files(
     // check that the mod.rs file exists
     let mut mod_rs = MarkedFile::new(output_dir.join("mod.rs"))?;
 
+    if config.once_common_structs {
+        let mut common_file = MarkedFile::new(output_dir.join("common.rs"))?;
+        common_file.ensure_file_signature()?;
+        common_file.file_contents = {
+            let mut tmp = String::from(FILE_SIGNATURE);
+            tmp.push_str(&code::generate_common_structs(&config.default_table_options));
+            tmp
+        };
+        common_file.write()?;
+
+        mod_rs.ensure_mod_stmt("common");
+    }
+
     // pass 1: add code for new tables
     for table in generated.iter() {
+        if config.once_common_structs && table.name == "common" {
+            return Err(Error::other("Cannot have a table named \"common\" while having option \"once_common_structs\" enabled"))
+        }
+
         let table_dir = output_dir.join(table.name.to_string());
 
         if !table_dir.exists() {

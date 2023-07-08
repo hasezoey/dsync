@@ -3,11 +3,14 @@ use std::path::PathBuf;
 use crate::error::{Error, IOErrorToError, Result};
 
 pub struct MarkedFile {
+    /// File contents to read / to write
     pub file_contents: String,
+    /// Path of the resulting file
     pub path: PathBuf,
 }
 
 impl MarkedFile {
+    /// Tries to open the file at `path` and read contents into `file_contents`
     pub fn new(path: PathBuf) -> Result<MarkedFile> {
         Ok(MarkedFile {
             path: path.clone(),
@@ -91,6 +94,8 @@ impl MarkedFile {
                 .starts_with(crate::parser::FILE_SIGNATURE)
     }
 
+    /// Ensure that the file, if it already exists, has the dsync file signature
+    /// to prevent accidental overwriting of non-dsync files
     pub fn ensure_file_signature(&self) -> Result<()> {
         if !self.has_file_signature() {
             return Err(Error::no_file_signature(format!("Expected file '{path:#?}' to have file signature ('{sig}') -- you might be accidentally overwriting files that weren't generated!", path=self.path, sig=crate::parser::FILE_SIGNATURE)));

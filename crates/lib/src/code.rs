@@ -336,13 +336,6 @@ fn build_table_fns(
 
     // template variables
     let table_name = table.name.to_string();
-    #[cfg(feature = "tsync")]
-    let tsync = match table_options.get_tsync() {
-        true => "#[tsync::tsync]",
-        false => "",
-    };
-    #[cfg(not(feature = "tsync"))]
-    let tsync = "";
     #[cfg(feature = "async")]
     let async_keyword = if table_options.get_async() {
         " async"
@@ -368,24 +361,9 @@ fn build_table_fns(
 
     let mut buffer = String::new();
 
-    buffer.push_str(&format!(
-        r##"{tsync}
-#[derive(Debug, {serde_derive})]
-pub struct PaginationResult<T> {{
-    pub items: Vec<T>,
-    pub total_items: i64,
-    /// 0-based index
-    pub page: i64,
-    pub page_size: i64,
-    pub num_pages: i64,
-}}
-"##,
-        serde_derive = if config.default_table_options.get_serde() {
-            Struct::DERIVE_Serde_Serialize
-        } else {
-            ""
-        }
-    ));
+    if !config.once_common_structs {
+        buffer.push_str(&generate_common_structs(&table_options));
+    }
 
     buffer.push_str(&format!(
         r##"
@@ -481,6 +459,36 @@ impl {struct_name} {{
     Ok(buffer)
 }
 
+/// Generate common structs
+pub fn generate_common_structs(table_options: &TableOptions<'_>) -> String {
+    #[cfg(feature = "tsync")]
+    let tsync = match table_options.get_tsync() {
+        true => "#[tsync::tsync]",
+        false => "",
+    };
+    #[cfg(not(feature = "tsync"))]
+    let tsync = "";
+
+    format!(
+        r##"{tsync}
+#[derive(Debug, {serde_derive})]
+pub struct PaginationResult<T> {{
+    pub items: Vec<T>,
+    pub total_items: i64,
+    /// 0-based index
+    pub page: i64,
+    pub page_size: i64,
+    pub num_pages: i64,
+}}
+"##,
+        serde_derive = if table_options.get_serde() {
+            Struct::DERIVE_Serde_Serialize
+        } else {
+            ""
+        }
+    )
+}
+
 /// Generate all the imports that are required
 fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String {
     #[cfg(feature = "async")]
@@ -511,17 +519,23 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
     } else {
         ""
     };
+    let common_structs_imports = if config.once_common_structs {
+        format!("\nuse {}common::*;", config.model_path)
+    } else {
+        "".into()
+    };
 
     let mut schema_path = config.schema_path.clone();
     schema_path.push('*');
     format!(
         "use crate::diesel::*;
-use {schema_path};
+use {schema_path};{common_structs_imports}
 use diesel::QueryResult;
 {serde_imports}{async_imports}
 {belongs_imports}
 
 type Connection = {connection_type};\n",
+        common_structs_imports = common_structs_imports,
         connection_type = config.connection_type,
         belongs_imports = belongs_imports,
         async_imports = async_imports,

@@ -8,6 +8,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 - replace dependency `inflector` with `heck` (`heck` is used by `diesel` and `clap`)
   - remove converting struct names with `to_singular`
 - simplify implementation for how struct derives are generated (order of derives has changed)
+- add option `once-common-structs` to only generate common structs once
 
 ## 0.1.0
 

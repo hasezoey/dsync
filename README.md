@@ -117,6 +117,7 @@ cargo install dsync-hasezoey
 * `--model-path`: (optional) set a custom model import path, default `crate::models::`
 * `--schema-path`: (optional) set a custom schema import path, default `crate::schema::`
 * `--only-necessary-derives`: (optional) set to only generate the base necessary diesel derives for a struct
+* `--once-common-structs`: (optional) if set, common structs like `PaginationResult` are only generated once
 * note: the CLI has fail-safes to prevent accidental file overwriting
 
 ```sh

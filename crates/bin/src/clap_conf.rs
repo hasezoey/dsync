@@ -78,4 +78,8 @@ pub struct MainOptions {
     /// Only generate the necessary diesel derives for a struct
     #[arg(long = "only-necessary-derives")]
     pub only_necessary_derives: bool,
+
+    /// Only generate common structs once and put them in a common file
+    #[arg(long = "once-common-structs")]
+    pub once_common_structs: bool,
 }
