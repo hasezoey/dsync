@@ -36,7 +36,7 @@ pub struct ParsedTableMacro {
         JoinColumn, /* this is the column from this table which maps to the foreign table's primary key*/
     )>,
     /// Final Generated code
-    pub generated_code: String,
+    pub generated_code: Option<String>,
 }
 
 impl ParsedTableMacro {
@@ -115,7 +115,7 @@ pub fn parse_and_generate_code(
     }
 
     for table in tables.iter_mut() {
-        table.generated_code = code::generate_for_table(table.clone(), config)?;
+        table.generated_code = Some(code::generate_for_table(table.clone(), config)?);
     }
 
     Ok(tables)
@@ -321,9 +321,7 @@ fn handle_table_macro(
         columns: table_columns,
         primary_key_columns: table_primary_key_idents,
         foreign_keys: vec![],
-        generated_code: format!(
-            "{FILE_SIGNATURE}\n\nFATAL ERROR: nothing was generated; this shouldn't be possible."
-        ),
+        generated_code: None,
     })
 }
 

@@ -206,7 +206,7 @@ pub fn generate_files(
         let mut table_mod_rs = MarkedFile::new(table_dir.join("mod.rs"))?;
 
         table_generated_rs.ensure_file_signature()?;
-        table_generated_rs.file_contents = table.generated_code.clone();
+        table_generated_rs.file_contents = table.generated_code.as_ref().ok_or(Error::other(format!("Expected code for table \"{}\" to be generated", table.struct_name)))?.clone();
         table_generated_rs.write()?;
 
         table_mod_rs.ensure_mod_stmt("generated");
