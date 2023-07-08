@@ -2,6 +2,10 @@
 
 This Changelog only lists the changes done to this fork and since 0.0.13
 
+## next
+
+- add option `only-necessary-derives` to only generate the necessary diesel derives for a struct
+
 ## 0.1.0
 
 The First version of the fork

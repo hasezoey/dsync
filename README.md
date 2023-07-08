@@ -106,7 +106,7 @@ Setting up a custom binary allows you to completely customize the generation; ho
 cargo install dsync-hasezoey
 ```
 
-**CLI Usage**
+#### CLI Usage
 
 * `-i`: input argument: path to schema file
 * `-o`: output argument: path to directory where generated code should be written
@@ -116,6 +116,7 @@ cargo install dsync-hasezoey
 * `--no-serde`: (optional) if set, does not output any serde related code
 * `--model-path`: (optional) set a custom model import path, default `crate::models::`
 * `--schema-path`: (optional) set a custom schema import path, default `crate::schema::`
+* `--only-necessary-derives`: (optional) set to only generate the base necessary diesel derives for a struct
 * note: the CLI has fail-safes to prevent accidental file overwriting
 
 ```sh

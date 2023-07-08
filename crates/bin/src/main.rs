@@ -57,6 +57,10 @@ fn actual_main() -> anyhow::Result<()> {
         default_table_options = default_table_options.disable_serde();
     }
 
+    if args.only_necessary_derives {
+        default_table_options = default_table_options.only_necessary_derives();
+    }
+
     dsync_hasezoey::generate_files(
         args.input,
         args.output,

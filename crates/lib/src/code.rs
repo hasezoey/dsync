@@ -101,7 +101,26 @@ impl<'a> Struct<'a> {
     }
 
     fn attr_derive(&self) -> String {
-        format!("#[derive(Debug, {derive_serde}Clone, Queryable, Insertable{derive_aschangeset}{derive_identifiable}{derive_associations}{derive_selectable})]",
+        let derive_queryable = if self.opts.get_only_necessary_derives() {
+            match self.ty {
+                StructType::Read => { ", Queryable" },
+                _ => { "" }
+            }
+        } else {
+            ", Queryable"
+        };
+        let derive_insertable = if self.opts.get_only_necessary_derives() {
+            match self.ty {
+                StructType::Create => { ", Insertable" },
+                _ => { "" }
+            }
+        } else {
+            ", Insertable"
+        };
+
+        format!("#[derive(Debug, {derive_serde}Clone{derive_queryable}{derive_insertable}{derive_aschangeset}{derive_identifiable}{derive_associations}{derive_selectable})]",
+                derive_queryable = derive_queryable,
+                derive_insertable = derive_insertable,
                 derive_selectable = match self.ty {
                     StructType::Read => { ", Selectable" }
                     _ => { "" }

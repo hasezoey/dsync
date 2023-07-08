@@ -74,4 +74,8 @@ pub struct MainOptions {
     /// Set custom model use path, Default "crate::models::"
     #[arg(long = "model-path", default_value = "crate::models::")]
     pub model_path: String,
+
+    /// Only generate the necessary diesel derives for a struct
+    #[arg(long = "only-necessary-derives")]
+    pub only_necessary_derives: bool,
 }
