@@ -305,8 +305,8 @@ fn handle_table_macro(
             }
             _ => {
                 return Err(Error::unsupported_schema_format(
-                    "Invalid token tree item in diesel table macro)",
-                ))
+                    "Invalid token tree item in diesel table macro",
+                ));
             }
         }
     }
