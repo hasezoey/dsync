@@ -1,4 +1,3 @@
-use indoc::indoc;
 use inflector::Inflector;
 
 use crate::parser::{ParsedTableMacro, FILE_SIGNATURE};
@@ -245,13 +244,11 @@ impl<'a> Struct<'a> {
             .join(" ");
 
         let struct_code = format!(
-            indoc! {r#"
-            {tsync_attr}{derive_attr}
-            #[diesel(table_name={table_name}{primary_key}{belongs_to})]
-            pub struct {struct_name} {{
-            $COLUMNS$
-            }}
-        "#},
+            "{tsync_attr}{derive_attr}
+#[diesel(table_name={table_name}{primary_key}{belongs_to})]
+pub struct {struct_name} {{
+$COLUMNS$
+}}\n",
             tsync_attr = self.attr_tsync(),
             derive_attr = self.attr_derive(),
             table_name = table.name,
@@ -516,15 +513,13 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
     let mut schema_path = config.schema_path.clone();
     schema_path.push('*');
     format!(
-        indoc! {"
-        use crate::diesel::*;
-        use {schema_path};
-        use diesel::QueryResult;
-        {serde_imports}{async_imports}
-        {belongs_imports}
+        "use crate::diesel::*;
+use {schema_path};
+use diesel::QueryResult;
+{serde_imports}{async_imports}
+{belongs_imports}
 
-        type Connection = {connection_type};
-    "},
+type Connection = {connection_type};\n",
         connection_type = config.connection_type,
         belongs_imports = belongs_imports,
         async_imports = async_imports,
