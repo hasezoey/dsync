@@ -76,6 +76,7 @@ pub struct StructField {
     pub is_optional: bool,
 }
 
+#[allow(non_upper_case_globals)]
 impl<'a> Struct<'a> {
     pub fn new(
         ty: StructType,
@@ -113,48 +114,55 @@ impl<'a> Struct<'a> {
         ""
     }
 
-    fn attr_derive(&self) -> String {
-        let derive_queryable = if self.opts.get_only_necessary_derives() {
-            match self.ty {
-                StructType::Read => { ", Queryable" },
-                _ => { "" }
-            }
-        } else {
-            ", Queryable"
-        };
-        let derive_insertable = if self.opts.get_only_necessary_derives() {
-            match self.ty {
-                StructType::Create => { ", Insertable" },
-                _ => { "" }
-            }
-        } else {
-            ", Insertable"
-        };
+    const DERIVES_DEFAULT: &[&'static str] = &["Debug", "Clone"];
+    const DERIVE_Queryable: &str = "Queryable";
+    const DERIVE_Insertable: &str = "Insertable";
+    const DERIVE_Selectable: &str = "Selectable";
+    const DERIVE_Associations: &str = "Associations";
+    const DERIVE_Identifiable: &str = "Identifiable";
+    const DERIVE_AsChangeset: &str = "AsChangeset";
+    const DERIVE_Serde_Serialize: &str = "Serialize";
+    const DERIVE_Serde_Deserialize: &str = "Deserialize";
 
-        format!("#[derive(Debug, {derive_serde}Clone{derive_queryable}{derive_insertable}{derive_aschangeset}{derive_identifiable}{derive_associations}{derive_selectable})]",
-                derive_queryable = derive_queryable,
-                derive_insertable = derive_insertable,
-                derive_selectable = match self.ty {
-                    StructType::Read => { ", Selectable" }
-                    _ => { "" }
-                },
-                derive_associations = match self.ty {
-                    StructType::Read => {
-                        if !self.table.foreign_keys.is_empty() { ", Associations" } else { "" }
-                    }
-                    _ => { "" }
-                },
-                derive_identifiable = match self.ty {
-                    StructType::Read => {
-                        if !self.table.foreign_keys.is_empty() { ", Identifiable" } else { "" }
-                    }
-                    _ => { "" }
-                },
-                derive_aschangeset = if self.fields().iter().all(|f| self.table.primary_key_column_names().contains(&f.name)) {""} else { ", AsChangeset" },
-                derive_serde = if self.config.default_table_options.get_serde() {
-                    "Serialize, Deserialize, "
-                } else { "" }
-        )
+    fn attr_derive(&self) -> String {
+        let mut derives: Vec<&str> = Vec::from(Self::DERIVES_DEFAULT);
+
+        if self.config.default_table_options.get_serde() {
+            derives.push(Self::DERIVE_Serde_Serialize);
+            derives.push(Self::DERIVE_Serde_Deserialize);
+        }
+
+        if !self.opts.get_only_necessary_derives() || (self.opts.get_only_necessary_derives() && self.ty == StructType::Read) {
+            derives.push(Self::DERIVE_Queryable);
+        }
+        
+        if !self.opts.get_only_necessary_derives() || (self.opts.get_only_necessary_derives() && self.ty == StructType::Create) {
+            derives.push(Self::DERIVE_Insertable);
+        }
+
+        if self.ty == StructType::Read {
+            derives.push(Self::DERIVE_Selectable);
+
+            if !self.table.foreign_keys.is_empty() {
+                derives.push(Self::DERIVE_Identifiable);
+            }
+
+            if !self.table.foreign_keys.is_empty() {
+                derives.push(Self::DERIVE_Associations);
+            }
+        }
+
+        if !self
+            .fields()
+            .iter()
+            .all(|f| self.table.primary_key_column_names().contains(&f.name))
+        {
+            derives.push(Self::DERIVE_AsChangeset)
+        }
+
+        let derives = derives.join(", ");
+
+        format!("#[derive({})]", derives)
     }
 
     fn fields(&self) -> Vec<StructField> {
@@ -379,7 +387,7 @@ pub struct PaginationResult<T> {{
 }}
 "##,
         serde_derive = if config.default_table_options.get_serde() {
-            "Serialize"
+            Struct::DERIVE_Serde_Serialize
         } else {
             ""
         }

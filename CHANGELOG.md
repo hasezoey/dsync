@@ -7,6 +7,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 - add option `only-necessary-derives` to only generate the necessary diesel derives for a struct
 - replace dependency `inflector` with `heck` (`heck` is used by `diesel` and `clap`)
   - remove converting struct names with `to_singular`
+- simplify implementation for how struct derives are generated (order of derives has changed)
 
 ## 0.1.0
 

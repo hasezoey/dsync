@@ -8,7 +8,7 @@ use diesel::QueryResult;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
-#[derive(Debug, Clone, Queryable, Insertable, AsChangeset, Selectable)]
+#[derive(Debug, Clone, Queryable, Insertable, Selectable, AsChangeset)]
 #[diesel(table_name=todos, primary_key(id))]
 pub struct Todos {
     pub id: i32,

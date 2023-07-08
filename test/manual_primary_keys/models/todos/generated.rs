@@ -8,13 +8,13 @@ use serde::{Deserialize, Serialize};
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, Selectable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable)]
 #[diesel(table_name=todos, primary_key(id))]
 pub struct Todos {
     pub id: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 #[diesel(table_name=todos)]
 pub struct CreateTodos {
     pub id: i32,

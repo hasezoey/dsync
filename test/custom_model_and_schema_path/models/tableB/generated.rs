@@ -8,21 +8,21 @@ use crate::data::models::table_a::TableA;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
-#[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset, Identifiable, Associations, Selectable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, Identifiable, Associations, AsChangeset)]
 #[diesel(table_name=tableB, primary_key(_id), belongs_to(TableA, foreign_key=link))]
 pub struct TableB {
     pub _id: i32,
     pub link: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=tableB)]
 pub struct CreateTableB {
     pub _id: i32,
     pub link: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Queryable, Insertable, AsChangeset)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=tableB)]
 pub struct UpdateTableB {
     pub link: Option<i32>,
