@@ -378,6 +378,7 @@ fn build_table_fns(
     if create_struct.has_fields() {
         buffer.push_str(&format!(
             r##"
+    /// Insert a new row on {table_name} with a given [`{create_struct_identifier}`]
     pub{async_keyword} fn create(db: &mut Connection, item: &{create_struct_identifier}) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
@@ -388,6 +389,7 @@ fn build_table_fns(
     } else {
         buffer.push_str(&format!(
             r##"
+    /// Insert a new row on {table_name} with all default values
     pub{async_keyword} fn create(db: &mut Connection) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
@@ -399,6 +401,7 @@ fn build_table_fns(
 
     buffer.push_str(&format!(
         r##"
+    /// Get a specific row with the primary key
     pub{async_keyword} fn read(db: &mut Connection, {item_id_params}) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
@@ -437,6 +440,7 @@ fn build_table_fns(
         // we should generate an update() method.
 
         buffer.push_str(&format!(r##"
+    /// Update a row given the primary key with updates from [`{update_struct_identifier}`]
     pub{async_keyword} fn update(db: &mut Connection, {item_id_params}, item: &{update_struct_identifier}) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
@@ -447,6 +451,7 @@ fn build_table_fns(
 
     buffer.push_str(&format!(
         r##"
+    /// Delete a row with the given primary key
     pub{async_keyword} fn delete(db: &mut Connection, {item_id_params}) -> QueryResult<usize> {{
         use {schema_path}{table_name}::dsl::*;
 
