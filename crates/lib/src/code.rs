@@ -4,7 +4,7 @@ use crate::parser::{ParsedTableMacro, FILE_SIGNATURE};
 use crate::{GenerationConfig, Result, TableOptions};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum StructType {
+pub enum StructType {
     /// Type for the main struct, which can be queried and has all properties
     Read,
     // this struct type maps directly to a database row
@@ -45,7 +45,7 @@ impl StructType {
 }
 
 #[derive(Debug)]
-struct Struct<'a> {
+pub struct Struct<'a> {
     /// Struct name
     identifier: String,
     /// Type of the struct
