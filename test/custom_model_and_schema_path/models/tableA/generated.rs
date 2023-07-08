@@ -6,12 +6,14 @@ use crate::data::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
+/// Struct representing a row for table `tableA`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable)]
 #[diesel(table_name=tableA, primary_key(_id))]
 pub struct TableA {
     pub _id: i32,
 }
 
+/// Create struct for [`TableA`] on table `tableA`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 #[diesel(table_name=tableA)]
 pub struct CreateTableA {
@@ -35,12 +37,14 @@ pub struct PaginationResult<T> {
 
 impl TableA {
 
+    /// Insert a new row on tableA with a given [`CreateTableA`]
     pub fn create(db: &mut Connection, item: &CreateTableA) -> QueryResult<Self> {
         use crate::data::schema::tableA::dsl::*;
 
         insert_into(tableA).values(item).get_result::<Self>(db)
     }
 
+    /// Get a specific row with the primary key
     pub fn read(db: &mut Connection, param__id: i32) -> QueryResult<Self> {
         use crate::data::schema::tableA::dsl::*;
 
@@ -65,6 +69,7 @@ impl TableA {
         })
     }
 
+    /// Delete a row with the given primary key
     pub fn delete(db: &mut Connection, param__id: i32) -> QueryResult<usize> {
         use crate::data::schema::tableA::dsl::*;
 

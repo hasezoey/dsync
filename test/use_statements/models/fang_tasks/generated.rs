@@ -6,6 +6,7 @@ use crate::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
+/// Struct representing a row for table `fang_tasks`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, AsChangeset)]
 #[diesel(table_name=fang_tasks, primary_key(id))]
 pub struct FangTasks {
@@ -21,6 +22,7 @@ pub struct FangTasks {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+/// Create struct for [`FangTasks`] on table `fang_tasks`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=fang_tasks)]
 pub struct CreateFangTasks {
@@ -36,6 +38,7 @@ pub struct CreateFangTasks {
     pub updated_at: chrono::DateTime<chrono::Utc>,
 }
 
+/// Update struct for [`FangTasks`] on table `fang_tasks`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=fang_tasks)]
 pub struct UpdateFangTasks {
@@ -67,12 +70,14 @@ pub struct PaginationResult<T> {
 
 impl FangTasks {
 
+    /// Insert a new row on fang_tasks with a given [`CreateFangTasks`]
     pub fn create(db: &mut Connection, item: &CreateFangTasks) -> QueryResult<Self> {
         use crate::schema::fang_tasks::dsl::*;
 
         insert_into(fang_tasks).values(item).get_result::<Self>(db)
     }
 
+    /// Get a specific row with the primary key
     pub fn read(db: &mut Connection, param_id: uuid::Uuid) -> QueryResult<Self> {
         use crate::schema::fang_tasks::dsl::*;
 
@@ -97,12 +102,14 @@ impl FangTasks {
         })
     }
 
+    /// Update a row given the primary key with updates from [`UpdateFangTasks`]
     pub fn update(db: &mut Connection, param_id: uuid::Uuid, item: &UpdateFangTasks) -> QueryResult<Self> {
         use crate::schema::fang_tasks::dsl::*;
 
         diesel::update(fang_tasks.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
+    /// Delete a row with the given primary key
     pub fn delete(db: &mut Connection, param_id: uuid::Uuid) -> QueryResult<usize> {
         use crate::schema::fang_tasks::dsl::*;
 

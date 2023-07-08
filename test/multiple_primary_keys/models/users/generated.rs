@@ -6,6 +6,7 @@ use crate::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
+/// Struct representing a row for table `users`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, AsChangeset)]
 #[diesel(table_name=users, primary_key(name,address))]
 pub struct Users {
@@ -14,6 +15,7 @@ pub struct Users {
     pub secret: String,
 }
 
+/// Create struct for [`Users`] on table `users`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=users)]
 pub struct CreateUsers {
@@ -22,6 +24,7 @@ pub struct CreateUsers {
     pub secret: String,
 }
 
+/// Update struct for [`Users`] on table `users`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=users)]
 pub struct UpdateUsers {
@@ -45,12 +48,14 @@ pub struct PaginationResult<T> {
 
 impl Users {
 
+    /// Insert a new row on users with a given [`CreateUsers`]
     pub fn create(db: &mut Connection, item: &CreateUsers) -> QueryResult<Self> {
         use crate::schema::users::dsl::*;
 
         insert_into(users).values(item).get_result::<Self>(db)
     }
 
+    /// Get a specific row with the primary key
     pub fn read(db: &mut Connection, param_name: String, param_address: String) -> QueryResult<Self> {
         use crate::schema::users::dsl::*;
 
@@ -75,12 +80,14 @@ impl Users {
         })
     }
 
+    /// Update a row given the primary key with updates from [`UpdateUsers`]
     pub fn update(db: &mut Connection, param_name: String, param_address: String, item: &UpdateUsers) -> QueryResult<Self> {
         use crate::schema::users::dsl::*;
 
         diesel::update(users.filter(name.eq(param_name)).filter(address.eq(param_address))).set(item).get_result(db)
     }
 
+    /// Delete a row with the given primary key
     pub fn delete(db: &mut Connection, param_name: String, param_address: String) -> QueryResult<usize> {
         use crate::schema::users::dsl::*;
 

@@ -7,6 +7,7 @@ use crate::data::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
+/// Struct representing a row for table `tableB`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, Identifiable, Associations, AsChangeset)]
 #[diesel(table_name=tableB, primary_key(_id), belongs_to(TableA, foreign_key=link))]
 pub struct TableB {
@@ -14,6 +15,7 @@ pub struct TableB {
     pub link: i32,
 }
 
+/// Create struct for [`TableB`] on table `tableB`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=tableB)]
 pub struct CreateTableB {
@@ -21,6 +23,7 @@ pub struct CreateTableB {
     pub link: i32,
 }
 
+/// Update struct for [`TableB`] on table `tableB`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=tableB)]
 pub struct UpdateTableB {
@@ -44,12 +47,14 @@ pub struct PaginationResult<T> {
 
 impl TableB {
 
+    /// Insert a new row on tableB with a given [`CreateTableB`]
     pub fn create(db: &mut Connection, item: &CreateTableB) -> QueryResult<Self> {
         use crate::data::schema::tableB::dsl::*;
 
         insert_into(tableB).values(item).get_result::<Self>(db)
     }
 
+    /// Get a specific row with the primary key
     pub fn read(db: &mut Connection, param__id: i32) -> QueryResult<Self> {
         use crate::data::schema::tableB::dsl::*;
 
@@ -74,12 +79,14 @@ impl TableB {
         })
     }
 
+    /// Update a row given the primary key with updates from [`UpdateTableB`]
     pub fn update(db: &mut Connection, param__id: i32, item: &UpdateTableB) -> QueryResult<Self> {
         use crate::data::schema::tableB::dsl::*;
 
         diesel::update(tableB.filter(_id.eq(param__id))).set(item).get_result(db)
     }
 
+    /// Delete a row with the given primary key
     pub fn delete(db: &mut Connection, param__id: i32) -> QueryResult<usize> {
         use crate::data::schema::tableB::dsl::*;
 

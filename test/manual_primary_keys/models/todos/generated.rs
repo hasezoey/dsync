@@ -6,12 +6,14 @@ use crate::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
+/// Struct representing a row for table `todos`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable)]
 #[diesel(table_name=todos, primary_key(id))]
 pub struct Todos {
     pub id: i32,
 }
 
+/// Create struct for [`Todos`] on table `todos`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 #[diesel(table_name=todos)]
 pub struct CreateTodos {
@@ -35,12 +37,14 @@ pub struct PaginationResult<T> {
 
 impl Todos {
 
+    /// Insert a new row on todos with a given [`CreateTodos`]
     pub fn create(db: &mut Connection, item: &CreateTodos) -> QueryResult<Self> {
         use crate::schema::todos::dsl::*;
 
         insert_into(todos).values(item).get_result::<Self>(db)
     }
 
+    /// Get a specific row with the primary key
     pub fn read(db: &mut Connection, param_id: i32) -> QueryResult<Self> {
         use crate::schema::todos::dsl::*;
 
@@ -65,6 +69,7 @@ impl Todos {
         })
     }
 
+    /// Delete a row with the given primary key
     pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
         use crate::schema::todos::dsl::*;
 

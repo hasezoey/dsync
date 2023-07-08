@@ -261,8 +261,15 @@ impl<'a> Struct<'a> {
             lines.push(format!(r#"    pub {field_name}: {field_type},"#));
         }
 
+        let table_name = &table.name;
+        let struct_doc = match self.ty {
+            StructType::Read => format!("/// Struct representing a row for table `{table_name}`\n"),
+            StructType::Update => format!("/// Update struct for [`{struct_name}`] on table `{table_name}`\n", struct_name = table.struct_name),
+            StructType::Create => format!("/// Create struct for [`{struct_name}`] on table `{table_name}`\n", struct_name = table.struct_name),
+        };
+
         let struct_code = format!(
-            "{tsync_attr}{derive_attr}
+            "{struct_doc}{tsync_attr}{derive_attr}
 #[diesel(table_name={table_name}{primary_key}{belongs_to})]
 pub struct {struct_name} {{
 {lines}

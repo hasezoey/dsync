@@ -6,6 +6,7 @@ use crate::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
+/// Struct representing a row for table `todos`
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, AsChangeset)]
 #[diesel(table_name=todos, primary_key(id))]
 pub struct Todos {
@@ -14,6 +15,7 @@ pub struct Todos {
     pub created_at: chrono::NaiveDateTime,
 }
 
+/// Create struct for [`Todos`] on table `todos`
 #[derive(Debug, Clone, Serialize, Deserialize, Insertable, AsChangeset)]
 #[diesel(table_name=todos)]
 pub struct CreateTodos {
@@ -21,6 +23,7 @@ pub struct CreateTodos {
     pub test: String,
 }
 
+/// Update struct for [`Todos`] on table `todos`
 #[derive(Debug, Clone, Serialize, Deserialize, AsChangeset)]
 #[diesel(table_name=todos)]
 pub struct UpdateTodos {
@@ -45,12 +48,14 @@ pub struct PaginationResult<T> {
 
 impl Todos {
 
+    /// Insert a new row on todos with a given [`CreateTodos`]
     pub fn create(db: &mut Connection, item: &CreateTodos) -> QueryResult<Self> {
         use crate::schema::todos::dsl::*;
 
         insert_into(todos).values(item).get_result::<Self>(db)
     }
 
+    /// Get a specific row with the primary key
     pub fn read(db: &mut Connection, param_id: i32) -> QueryResult<Self> {
         use crate::schema::todos::dsl::*;
 
@@ -75,12 +80,14 @@ impl Todos {
         })
     }
 
+    /// Update a row given the primary key with updates from [`UpdateTodos`]
     pub fn update(db: &mut Connection, param_id: i32, item: &UpdateTodos) -> QueryResult<Self> {
         use crate::schema::todos::dsl::*;
 
         diesel::update(todos.filter(id.eq(param_id))).set(item).get_result(db)
     }
 
+    /// Delete a row with the given primary key
     pub fn delete(db: &mut Connection, param_id: i32) -> QueryResult<usize> {
         use crate::schema::todos::dsl::*;
 
