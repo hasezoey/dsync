@@ -10,6 +10,7 @@ type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable)]
 #[diesel(table_name=todos, primary_key(id))]
 pub struct Todos {
+    /// Field Representing column `id`
     pub id: i32,
 }
 
@@ -17,6 +18,7 @@ pub struct Todos {
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 #[diesel(table_name=todos)]
 pub struct CreateTodos {
+    /// Field Representing column `id`
     pub id: i32,
 }
 

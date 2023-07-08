@@ -13,6 +13,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 - have less unnecessary new-lines (order of imports has changed)
 - add rust doc-comments to all generated functions
 - add rust doc-comments to all generated structs (not their fields)
+- add rust doc-comments to all generated fields listing their column name
 
 ## 0.1.0
 

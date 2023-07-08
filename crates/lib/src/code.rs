@@ -68,6 +68,8 @@ pub struct StructField {
     pub name: String,
     /// Type of the final field
     pub base_type: String,
+    /// Actual table column name
+    pub column_name: String,
 
     pub is_optional: bool,
 }
@@ -224,6 +226,7 @@ impl<'a> Struct<'a> {
                     name,
                     base_type,
                     is_optional,
+                    column_name: c.column_name.clone()
                 }
             })
             .collect()
@@ -258,7 +261,9 @@ impl<'a> Struct<'a> {
                 field.base_type.clone()
             };
 
-            lines.push(format!(r#"    pub {field_name}: {field_type},"#));
+            lines.push(format!(r#"    /// Field Representing column `{column_name}`
+    pub {field_name}: {field_type},"#, column_name = field.column_name
+        ));
         }
 
         let table_name = &table.name;

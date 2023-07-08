@@ -10,7 +10,9 @@ type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, AsChangeset)]
 #[diesel(table_name=todos, primary_key(id))]
 pub struct Todos {
+    /// Field Representing column `id`
     pub id: i32,
+    /// Field Representing column `created_at`
     pub created_at: chrono::NaiveDateTime,
 }
 
@@ -18,6 +20,7 @@ pub struct Todos {
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=todos)]
 pub struct UpdateTodos {
+    /// Field Representing column `created_at`
     pub created_at: Option<chrono::NaiveDateTime>,
 }
 

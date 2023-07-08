@@ -10,8 +10,11 @@ type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, Selectable, AsChangeset)]
 #[diesel(table_name=users, primary_key(name,address))]
 pub struct Users {
+    /// Field Representing column `name`
     pub name: String,
+    /// Field Representing column `address`
     pub address: String,
+    /// Field Representing column `secret`
     pub secret: String,
 }
 
@@ -19,8 +22,11 @@ pub struct Users {
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=users)]
 pub struct CreateUsers {
+    /// Field Representing column `name`
     pub name: String,
+    /// Field Representing column `address`
     pub address: String,
+    /// Field Representing column `secret`
     pub secret: String,
 }
 
@@ -28,6 +34,7 @@ pub struct CreateUsers {
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=users)]
 pub struct UpdateUsers {
+    /// Field Representing column `secret`
     pub secret: Option<String>,
 }
 
