@@ -18,7 +18,6 @@ pub struct CreateTableA {
     pub _id: i32,
 }
 
-
 #[derive(Debug, Serialize)]
 pub struct PaginationResult<T> {
     pub items: Vec<T>,

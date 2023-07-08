@@ -18,7 +18,6 @@ pub struct CreateTodos {
     pub id: i32,
 }
 
-
 #[derive(Debug, Serialize)]
 pub struct PaginationResult<T> {
     pub items: Vec<T>,

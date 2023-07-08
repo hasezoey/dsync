@@ -19,7 +19,6 @@ pub struct CreateTableA {
     pub _id: i32,
 }
 
-
 impl TableA {
 
     pub fn create(db: &mut Connection, item: &CreateTableA) -> QueryResult<Self> {

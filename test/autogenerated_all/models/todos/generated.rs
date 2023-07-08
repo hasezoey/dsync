@@ -13,7 +13,6 @@ pub struct Todos {
     pub created_at: chrono::NaiveDateTime,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable, AsChangeset)]
 #[diesel(table_name=todos)]
 pub struct UpdateTodos {

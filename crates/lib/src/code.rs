@@ -282,7 +282,7 @@ pub struct {struct_name} {{
 
         if fields.is_empty() {
             self.has_fields = Some(false);
-            self.rendered_code = Some("".to_string());
+            self.rendered_code = None;
         } else {
             self.has_fields = Some(true);
             self.rendered_code = Some(struct_code);
@@ -535,12 +535,15 @@ pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) ->
     let update_struct = Struct::new(StructType::Update, &table, config);
     let create_struct = Struct::new(StructType::Create, &table, config);
 
-    let mut structs = String::new();
-    structs.push_str(read_struct.code());
-    structs.push('\n');
-    structs.push_str(create_struct.code());
-    structs.push('\n');
-    structs.push_str(update_struct.code());
+    let mut structs = String::from(read_struct.code());
+    if create_struct.rendered_code.is_some() {
+        structs.push('\n');
+        structs.push_str(create_struct.code());    
+    }
+    if update_struct.rendered_code.is_some() {
+        structs.push('\n');
+        structs.push_str(update_struct.code());    
+    }
 
     let functions = build_table_fns(&table, config, create_struct, update_struct)?;
     let imports = build_imports(&table, config);
