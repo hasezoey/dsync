@@ -2,7 +2,7 @@
 
 **This is a fork of [Wulf's dsync](https://github.com/Wulf/dsync) with some Pull Requests merged, see [Difference with original](https://github.com/hasezoey/dsync#difference-with-original)**
 
-For a binary, use [dsync-hasezoey crates.io](https://crates.io/crates/dsync-hasezoey) or [dsync-hasezoey github](https://github.com/hasezoey/dsync)
+For a binary, use [dsync-hasezoey crates.io](https://crates.io/crates/dsync-hasezoey) or [dsync-hasezoey github](https://github.com/hasezoey/dsync#binary)
 
 Usage:
 
@@ -20,3 +20,5 @@ pub fn main() {
     );
 }
 ```
+
+[docs.rs Documentation](https://docs.rs/libdsync-hasezoey/latest/dsync_hasezoey/)
