@@ -5,17 +5,17 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 ## next
 
 - add option `only-necessary-derives` to only generate the necessary diesel derives for a struct
+- add option `file-mode` to set a different mode than direct `overwrite`
+- add option `once-common-structs` to only generate common structs once
 - replace dependency `inflector` with `heck` (`heck` is used by `diesel` and `clap`)
   - remove converting struct names with `to_singular`
 - simplify implementation for how struct derives are generated (order of derives has changed)
-- add option `once-common-structs` to only generate common structs once
 - always end model files with a empty new line
 - have less unnecessary new-lines (order of imports has changed)
 - add rust doc-comments to all generated functions
 - add rust doc-comments to all generated structs (not their fields)
 - add rust doc-comments to all generated fields listing their column name
 - add display on what happened to files (unchanged, modified, overwritten, deleted)
-- add option `file-mode` to set a different mode than direct `overwrite`
 
 ## 0.1.0
 
