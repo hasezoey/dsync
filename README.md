@@ -126,8 +126,36 @@ cargo install dsync-hasezoey
 
 Note: any other `file-mode` than `newfile` will check that the file is a dsync-managed file
 
+`./test/readme_cli_base_example`:
+
 ```sh
-dsync -i src/schema.rs -o src/models -c "diesel::SqliteConnection"
+$ dsync -i src/schema.rs -o src/models -c "diesel::SqliteConnection"
+Modified models/todos/generated.rs
+Modified models/todos/mod.rs
+Modified models/mod.rs
+Modified 3 files
+
+$ find . -xdev -type f
+./src/models/mod.rs
+./src/models/todos/mod.rs
+./src/models/todos/generated.rs
+./src/schema.rs
+```
+
+`./test/readme_cli_advanced_example`:
+
+```sh
+$ dsync -i src/schema.rs -o src/models -c "diesel::SqliteConnection" --no-serde --only-necessary-derives --once-common-structs --single-model-file -g updated_at -g created_at
+Modified models/todos.rs
+Modified models/common.rs
+Modified models/mod.rs
+Modified 3 files
+
+$ find . -xdev -type f
+./src/models/mod.rs
+./src/models/todos.rs
+./src/models/common.rs
+./src/schema.rs
 ```
 
 ## Docs
