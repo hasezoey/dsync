@@ -14,6 +14,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 - add rust doc-comments to all generated functions
 - add rust doc-comments to all generated structs (not their fields)
 - add rust doc-comments to all generated fields listing their column name
+- add display on what happened to files (unchanged, modified, overwritten, deleted)
 
 ## 0.1.0
 

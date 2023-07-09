@@ -1,5 +1,5 @@
 use clap::Parser;
-use dsync_hasezoey::{GenerationConfig, TableOptions};
+use dsync_hasezoey::{FileChangesStatus, GenerationConfig, TableOptions};
 use std::collections::HashMap;
 
 mod clap_conf;
@@ -61,7 +61,7 @@ fn actual_main() -> anyhow::Result<()> {
         default_table_options = default_table_options.only_necessary_derives();
     }
 
-    dsync_hasezoey::generate_files(
+    let changes = dsync_hasezoey::generate_files(
         args.input,
         args.output,
         GenerationConfig {
@@ -74,6 +74,17 @@ fn actual_main() -> anyhow::Result<()> {
             single_model_file: args.single_model_file,
         },
     )?;
+
+    let mut modified: usize = 0;
+
+    for change in changes {
+        println!("{} {}", change.status, change.file.to_string_lossy());
+        if change.status != FileChangesStatus::Unchanged {
+            modified += 1;
+        }
+    }
+
+    println!("Modified {} files", modified);
 
     Ok(())
 }

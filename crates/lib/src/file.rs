@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::error::{Error, IOErrorToError, Result};
 
@@ -7,6 +7,7 @@ pub struct MarkedFile {
     pub file_contents: String,
     /// Path of the resulting file
     pub path: PathBuf,
+    modified: bool,
 }
 
 impl MarkedFile {
@@ -20,7 +21,12 @@ impl MarkedFile {
             } else {
                 std::fs::read_to_string(&path).attach_path_err(&path)?
             },
+            modified: false,
         })
+    }
+
+    pub fn is_modified(&self) -> bool {
+        self.modified
     }
 
     pub fn has_use_stmt(&self, use_name: &str) -> bool {
@@ -37,7 +43,8 @@ impl MarkedFile {
             self.file_contents.push('\n');
         }
         self.file_contents
-            .push_str(&format!("pub use {use_name};\n"))
+            .push_str(&format!("pub use {use_name};\n"));
+        self.modified = true;
     }
 
     pub fn add_mod_stmt(&mut self, mod_name: &str) {
@@ -46,7 +53,8 @@ impl MarkedFile {
             self.file_contents.push('\n');
         }
         self.file_contents
-            .push_str(&format!("pub mod {mod_name};\n"))
+            .push_str(&format!("pub mod {mod_name};\n"));
+        self.modified = true;
     }
 
     pub fn remove_use_stmt(&mut self, mod_name: &str) {
@@ -57,6 +65,7 @@ impl MarkedFile {
                 .replace(content_to_remove, "")
                 .trim()
                 .to_string();
+            self.modified = true;
         }
     }
 
@@ -68,6 +77,7 @@ impl MarkedFile {
                 .replace(content_to_remove, "")
                 .trim()
                 .to_string();
+            self.modified = true;
         }
     }
 
@@ -108,7 +118,15 @@ impl MarkedFile {
         std::fs::write(&self.path, &self.file_contents).attach_path_err(&self.path)
     }
 
-    pub fn delete(self) -> Result<()> {
-        std::fs::remove_file(&self.path).attach_path_err(&self.path)
+    pub fn delete(self) -> Result<PathBuf> {
+        std::fs::remove_file(&self.path).attach_path_err(&self.path)?;
+
+        Ok(self.path)
+    }
+}
+
+impl AsRef<Path> for MarkedFile {
+    fn as_ref(&self) -> &Path {
+        &self.path
     }
 }

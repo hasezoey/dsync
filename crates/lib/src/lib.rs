@@ -10,6 +10,7 @@ use file::MarkedFile;
 use parser::ParsedTableMacro;
 pub use parser::FILE_SIGNATURE;
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::path::PathBuf;
 
 /// Individual Options for a given table
@@ -167,13 +168,70 @@ pub fn generate_code(
     parser::parse_and_generate_code(diesel_schema_file_contents, config)
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum FileChangesStatus {
+    /// Status to mark unchanged file contents
+    Unchanged,
+    /// Status to mark overwritten file contents
+    Overwritten,
+    // /// Status to mark a ".dsyncnew" file being generated
+    // /// and the path to the ".dsyncnew" file
+    // NewFile(PathBuf),
+    /// Status to mark file contents to be modified
+    Modified,
+    /// Status if the file has been deleted
+    Deleted,
+}
+
+impl Display for FileChangesStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                FileChangesStatus::Unchanged => "Unchanged",
+                FileChangesStatus::Overwritten => "Overwritten",
+                FileChangesStatus::Modified => "Modified",
+                FileChangesStatus::Deleted => "Deleted",
+            }
+        )
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FileChanges {
+    /// File in question
+    pub file: PathBuf,
+    /// Status of the file
+    pub status: FileChangesStatus,
+}
+
+impl FileChanges {
+    pub fn new<P: AsRef<std::path::Path>>(path: P, status: FileChangesStatus) -> Self {
+        Self {
+            file: path.as_ref().to_owned(),
+            status,
+        }
+    }
+}
+
+impl From<&MarkedFile> for FileChanges {
+    fn from(value: &MarkedFile) -> Self {
+        if value.is_modified() {
+            Self::new(value, FileChangesStatus::Modified)
+        } else {
+            Self::new(value, FileChangesStatus::Unchanged)
+        }
+    }
+}
+
 /// Generate all models for a given diesel schema input file
 /// Models are saved to disk
 pub fn generate_files(
     input_diesel_schema_file: PathBuf,
     output_models_dir: PathBuf,
     config: GenerationConfig,
-) -> Result<()> {
+) -> Result<Vec<FileChanges>> {
     let input = input_diesel_schema_file;
     let output_dir = output_models_dir;
 
@@ -190,6 +248,8 @@ pub fn generate_files(
             output_dir,
         ));
     }
+
+    let mut file_status = Vec::new();
 
     // check that the mod.rs file exists
     let mut mod_rs = MarkedFile::new(output_dir.join("mod.rs"))?;
@@ -208,6 +268,8 @@ pub fn generate_files(
         common_file.write()?;
 
         mod_rs.ensure_mod_stmt("common");
+
+        file_status.push(FileChanges::from(&common_file));
     }
 
     // pass 1: add code for new tables
@@ -252,12 +314,16 @@ pub fn generate_files(
             .clone();
         table_generated_rs.write()?;
 
+        file_status.push(FileChanges::from(&table_generated_rs)); // TODO: implement for ::NewFile
+
         if !config.single_model_file {
             let mut table_mod_rs = MarkedFile::new(table_dir.join("mod.rs"))?;
 
             table_mod_rs.ensure_mod_stmt("generated");
             table_mod_rs.ensure_use_stmt("generated::*");
             table_mod_rs.write()?;
+
+            file_status.push(FileChanges::from(&table_mod_rs));
         }
 
         mod_rs.ensure_mod_stmt(table.name.to_string().as_str());
@@ -301,6 +367,10 @@ pub fn generate_files(
 
         // this table was deleted, let's delete the generated code
         std::fs::remove_file(&generated_rs_path).attach_path_err(&generated_rs_path)?;
+        file_status.push(FileChanges::new(
+            &generated_rs_path,
+            FileChangesStatus::Deleted,
+        ));
 
         // remove the mod.rs file if there isn't anything left in there except the use stmt
         let table_mod_rs_path = item.path().join("mod.rs");
@@ -312,9 +382,11 @@ pub fn generate_files(
             table_mod_rs.write()?;
 
             if table_mod_rs.file_contents.trim().is_empty() {
-                table_mod_rs.delete()?
+                let table_mod_rs = table_mod_rs.delete()?;
+                file_status.push(FileChanges::new(&table_mod_rs, FileChangesStatus::Deleted));
             } else {
-                table_mod_rs.write()? // write the changes we made above
+                table_mod_rs.write()?; // write the changes we made above
+                file_status.push(FileChanges::from(&table_mod_rs));
             }
         }
 
@@ -335,5 +407,7 @@ pub fn generate_files(
 
     mod_rs.write()?;
 
-    Ok(())
+    file_status.push(FileChanges::from(&mod_rs));
+
+    Ok(file_status)
 }
