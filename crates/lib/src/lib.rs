@@ -257,14 +257,14 @@ pub fn generate_files(
     if config.once_common_structs {
         let mut common_file = MarkedFile::new(output_dir.join("common.rs"))?;
         common_file.ensure_file_signature()?;
-        common_file.file_contents = {
+        common_file.change_file_contents({
             let mut tmp = String::from(FILE_SIGNATURE);
             tmp.push('\n');
             tmp.push_str(&code::generate_common_structs(
                 &config.default_table_options,
             ));
             tmp
-        };
+        });
         common_file.write()?;
 
         mod_rs.ensure_mod_stmt("common");
@@ -304,14 +304,14 @@ pub fn generate_files(
         let mut table_generated_rs = MarkedFile::new(table_dir.join(table_file_name))?;
 
         table_generated_rs.ensure_file_signature()?;
-        table_generated_rs.file_contents = table
+        table_generated_rs.change_file_contents(table
             .generated_code
             .as_ref()
             .ok_or(Error::other(format!(
                 "Expected code for table \"{}\" to be generated",
                 table.struct_name
             )))?
-            .clone();
+            .clone());
         table_generated_rs.write()?;
 
         file_status.push(FileChanges::from(&table_generated_rs)); // TODO: implement for ::NewFile
@@ -381,7 +381,7 @@ pub fn generate_files(
             table_mod_rs.remove_use_stmt("generated::*");
             table_mod_rs.write()?;
 
-            if table_mod_rs.file_contents.trim().is_empty() {
+            if table_mod_rs.get_file_contents().trim().is_empty() {
                 let table_mod_rs = table_mod_rs.delete()?;
                 file_status.push(FileChanges::new(&table_mod_rs, FileChangesStatus::Deleted));
             } else {

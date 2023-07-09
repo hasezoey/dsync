@@ -4,7 +4,7 @@ use crate::error::{Error, IOErrorToError, Result};
 
 pub struct MarkedFile {
     /// File contents to read / to write
-    pub file_contents: String,
+    file_contents: String,
     /// Path of the resulting file
     pub path: PathBuf,
     modified: bool,
@@ -25,6 +25,10 @@ impl MarkedFile {
         })
     }
 
+    pub fn get_file_contents(&self) -> &str {
+        &self.file_contents
+    }
+
     pub fn is_modified(&self) -> bool {
         self.modified
     }
@@ -35,6 +39,14 @@ impl MarkedFile {
 
     pub fn has_mod_stmt(&self, mod_name: &str) -> bool {
         self.file_contents.contains(&format!("pub mod {mod_name};"))
+    }
+
+    /// Change `file_contents` to be `new_content`, only if they dont match
+    pub fn change_file_contents(&mut self, new_content: String) {
+        if self.file_contents != new_content {
+            self.file_contents = new_content;
+            self.modified = true;
+        }
     }
 
     pub fn add_use_stmt(&mut self, use_name: &str) {
