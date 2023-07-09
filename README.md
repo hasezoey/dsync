@@ -51,7 +51,7 @@ async fn demo(db: Connection) {
 
 For more examples, look into the [`test/`](test/) folder, where in `test.sh` the options used are listed, `schema.rs` is the diesel schema and all other files are output from dsync
 
-## Usage
+## Library
 
 1. Add this crate:
 
@@ -97,7 +97,7 @@ For more examples, look into the [`test/`](test/) folder, where in `test.sh` the
   dsync="run --bin dsync"
   ```
 
-### Pre-built binary
+## Binary
 
 Setting up a custom binary allows you to completely customize the generation; however, if complete customization isn't necessary, you can install the CLI directly
 (you'll have to make sure you keep it up-to-date by running this periodically):
@@ -106,7 +106,7 @@ Setting up a custom binary allows you to completely customize the generation; ho
 cargo install dsync-hasezoey
 ```
 
-#### CLI Usage
+### CLI Usage
 
 * `-i`: input argument: path to schema file
 * `-o`: output argument: path to directory where generated code should be written
