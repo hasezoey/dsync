@@ -91,6 +91,10 @@ pub struct MainOptions {
     /// "mod.rs" file will still be updated if necessary
     #[arg(long = "file-mode", value_enum, verbatim_doc_comment, default_value_t=FileMode::Overwrite)]
     pub file_mode: FileMode,
+
+    /// A prefix to treat a table as read-only, like "view_"
+    #[arg(long = "read-only-prefix")]
+    pub read_only_prefix: Option<Vec<String>>,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq, Copy)]

@@ -140,8 +140,9 @@ impl<'a> Struct<'a> {
             derives.push(Self::DERIVE_Queryable);
         }
 
-        if !self.opts.get_only_necessary_derives()
-            || (self.opts.get_only_necessary_derives() && self.ty == StructType::Create)
+        if (!self.opts.get_only_necessary_derives()
+            || (self.opts.get_only_necessary_derives() && self.ty == StructType::Create))
+            && !self.opts.get_read_only()
         {
             derives.push(Self::DERIVE_Insertable);
         }
@@ -162,6 +163,7 @@ impl<'a> Struct<'a> {
             .fields()
             .iter()
             .all(|f| self.table.primary_key_column_names().contains(&f.name))
+            && !self.opts.get_read_only()
         {
             derives.push(Self::DERIVE_AsChangeset)
         }
@@ -237,6 +239,19 @@ impl<'a> Struct<'a> {
     }
 
     fn render(&mut self) {
+        // only generate the "read" struct for read-only tables
+        if self.opts.get_read_only() {
+            match self.ty {
+                StructType::Read => (),
+                StructType::Update | StructType::Create => {
+                    self.has_fields = Some(false);
+                    self.rendered_code = None;
+
+                    return;
+                }
+            }
+        }
+
         let ty = self.ty;
         let table = &self.table;
 
@@ -408,7 +423,7 @@ fn build_table_fns(
     }}
 "##
         ));
-    } else {
+    } else if !table_options.get_read_only() {
         buffer.push_str(&format!(
             r##"
     /// Insert a new row on {table_name} with all default values
@@ -471,8 +486,9 @@ fn build_table_fns(
 "##));
     }
 
-    buffer.push_str(&format!(
-        r##"
+    if !table_options.get_read_only() {
+        buffer.push_str(&format!(
+            r##"
     /// Delete a row with the given primary key
     pub{async_keyword} fn delete(db: &mut Connection, {item_id_params}) -> QueryResult<usize> {{
         use {schema_path}{table_name}::dsl::*;
@@ -480,7 +496,8 @@ fn build_table_fns(
         diesel::delete({table_name}.{item_id_filters}).execute(db){await_keyword}
     }}
 "##
-    ));
+        ));
+    }
 
     buffer.push_str(
         r##"

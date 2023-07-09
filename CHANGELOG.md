@@ -5,6 +5,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 ## next
 
 - fix that a file is created if the file does not exist on `MarkedFile::new`
+- add option `read-only-prefix` to set prefixes for tables to treat as read-only (like `view_`)
 
 ## 0.2.0
 

@@ -73,6 +73,7 @@ fn actual_main() -> anyhow::Result<()> {
             once_common_structs: args.once_common_structs,
             single_model_file: args.single_model_file,
             file_mode: args.file_mode.into(),
+            read_only_prefix: args.read_only_prefix,
         },
     )?;
 
