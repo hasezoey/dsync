@@ -16,8 +16,7 @@ impl MarkedFile {
         Ok(MarkedFile {
             path: path.clone(),
             file_contents: if !path.exists() {
-                std::fs::write(&path, "").attach_path_err(&path)?;
-                "".to_string()
+                "".to_owned()
             } else {
                 std::fs::read_to_string(&path).attach_path_err(&path)?
             },

@@ -4,6 +4,8 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 
 ## next
 
+- fix that a file is created if the file does not exist on `MarkedFile::new`
+
 ## 0.2.0
 
 - add option `only-necessary-derives` to only generate the necessary diesel derives for a struct
