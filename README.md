@@ -124,7 +124,10 @@ cargo install dsync-hasezoey
   * `newfile`: If changes to the original file would be done, create a `.dsyncnew.rs` file instead
   * `none`: Do not change the file and do not create a new file (still lists the file if changes would be done)
 
-Note: any other `file-mode` than `newfile` will check that the file is a dsync-managed file
+Notes:
+
+* any other `file-mode` than `newfile` will check that the file is a dsync-managed file
+* if `--once-common-structs` is used, then when a table named `common` is found, a error it thrown
 
 `./test/readme_cli_base_example`:
 
