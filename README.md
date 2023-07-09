@@ -182,16 +182,7 @@ See LICENSE-APACHE, LICENSE-MIT, and COPYRIGHT for details.
 
 This Fork was made because the [original project](https://github.com/Wulf/dsync) was not updated anymore since March 2023 and had become incompatible with diesel 2.1.0.
 
-This Fork Merged:
-
-- [PR #54](https://github.com/Wulf/dsync/pull/54): option to disable Serde output
-- [PR #55](https://github.com/Wulf/dsync/pull/55): option to change `models` and `schema` paths
-- [PR #51](https://github.com/Wulf/dsync/pull/51): resolve conflicts with diesel 2.1.0
-- [PR #50](https://github.com/Wulf/dsync/pull/50): update CI stages and fix some clippy things
-
-Also changes done that were not a Pull request:
-
-- Some markdown style changes according to markdownlint
+See [CHANGELOG.md](./CHANGELOG.md) for all changes since the start of the fork.
 
 ## FAQ
 
