@@ -1,7 +1,7 @@
 [package]
 name = "dsync-hasezoey"
 description = "Generate rust structs & query functions from diesel schema files."
-version = "0.1.0"
+version = "0.2.0"
 readme = "README.md"
 repository = "https://github.com/hasezoey/dsync"
 license = "MIT OR Apache-2.0"
@@ -20,7 +20,7 @@ backtrace = ["libdsync-hasezoey/backtrace"]
 clap = { version = "4.3", features = ["derive", "wrap_help"] }
 clap_complete = "4.3"
 anyhow = { version = "1", features = ["backtrace"] }
-libdsync-hasezoey = { path = "../lib", version = "0.1.0" }
+libdsync-hasezoey = { path = "../lib", version = "0.2.0" }
 
 [[bin]]
 name = "dsync"

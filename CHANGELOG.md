@@ -4,6 +4,8 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 
 ## next
 
+## 0.2.0
+
 - add option `only-necessary-derives` to only generate the necessary diesel derives for a struct
 - add option `file-mode` to set a different mode than direct `overwrite`
 - add option `once-common-structs` to only generate common structs once
