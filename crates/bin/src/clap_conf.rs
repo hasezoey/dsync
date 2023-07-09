@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::Shell;
 use std::path::PathBuf;
 
@@ -86,4 +86,31 @@ pub struct MainOptions {
     /// Only generate a single model file instead of a folder with a "mod.rs" and a "generated.rs"
     #[arg(long = "single-model-file")]
     pub single_model_file: bool,
+
+    /// Set which file mode to use
+    /// "mod.rs" file will still be updated if necessary
+    #[arg(long = "file-mode", value_enum, verbatim_doc_comment, default_value_t=FileMode::Overwrite)]
+    pub file_mode: FileMode,
+}
+
+#[derive(ValueEnum, Clone, Debug, PartialEq, Copy)]
+#[value(rename_all = "lowercase")]
+pub enum FileMode {
+    /// Overwrite the file path, as long as a dsync signature is present
+    Overwrite,
+    /// Create a ".dsyncnew.rs" file if original is changed
+    NewFile,
+    /// Do nothing for the file
+    None,
+}
+
+impl From<FileMode> for dsync_hasezoey::FileMode {
+    fn from(value: FileMode) -> Self {
+        use dsync_hasezoey::FileMode as libFileMode;
+        match value {
+            FileMode::Overwrite => libFileMode::Overwrite,
+            FileMode::NewFile => libFileMode::NewFile,
+            FileMode::None => libFileMode::None,
+        }
+    }
 }

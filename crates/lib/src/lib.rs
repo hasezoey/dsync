@@ -146,6 +146,18 @@ pub struct GenerationConfig<'a> {
     pub once_common_structs: bool,
     /// Only generate a single model file instead of a folder with a "mod.rs" and a "generated.rs"
     pub single_model_file: bool,
+    /// Set which filemode to use
+    pub file_mode: FileMode,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum FileMode {
+    /// Overwrite the file path, as long as a dsync signature is present
+    Overwrite,
+    /// Create a ".dsyncnew" file if changed
+    NewFile,
+    /// Do nothing for the file
+    None,
 }
 
 impl GenerationConfig<'_> {
@@ -172,15 +184,19 @@ pub fn generate_code(
 pub enum FileChangesStatus {
     /// Status to mark unchanged file contents
     Unchanged,
+    /// Status to mark unchanged files, because of some ignore rule (like [FileMode::None])
+    UnchangedIgnored,
     /// Status to mark overwritten file contents
     Overwritten,
-    // /// Status to mark a ".dsyncnew" file being generated
-    // /// and the path to the ".dsyncnew" file
-    // NewFile(PathBuf),
+    /// Status to mark a ".dsyncnew" file being generated
+    /// and the path to the original file
+    NewFile(PathBuf),
     /// Status to mark file contents to be modified
     Modified,
     /// Status if the file has been deleted
     Deleted,
+    /// Status if the file should be deleted, but is not because of some ignore rule (like [FileMode::None])
+    DeletedIgnored,
 }
 
 impl Display for FileChangesStatus {
@@ -190,9 +206,12 @@ impl Display for FileChangesStatus {
             "{}",
             match self {
                 FileChangesStatus::Unchanged => "Unchanged",
+                FileChangesStatus::UnchangedIgnored => "Unchanged(Ignored)",
                 FileChangesStatus::Overwritten => "Overwritten",
                 FileChangesStatus::Modified => "Modified",
                 FileChangesStatus::Deleted => "Deleted",
+                FileChangesStatus::DeletedIgnored => "Deleted(Ignored)",
+                FileChangesStatus::NewFile(_) => "NewFile",
             }
         )
     }
@@ -213,16 +232,73 @@ impl FileChanges {
             status,
         }
     }
+
+    /// Create a new instance based on if the input file is modified or not
+    /// using either `status_modified` or `status_unmodified`
+    pub fn from_markedfile_custom(
+        marked_file: &MarkedFile,
+        status_modified: FileChangesStatus,
+        status_unmodified: FileChangesStatus,
+    ) -> Self {
+        if marked_file.is_modified() {
+            Self::new(marked_file, status_modified)
+        } else {
+            Self::new(marked_file, status_unmodified)
+        }
+    }
 }
 
 impl From<&MarkedFile> for FileChanges {
     fn from(value: &MarkedFile) -> Self {
-        if value.is_modified() {
-            Self::new(value, FileChangesStatus::Modified)
-        } else {
-            Self::new(value, FileChangesStatus::Unchanged)
-        }
+        Self::from_markedfile_custom(
+            value,
+            FileChangesStatus::Modified,
+            FileChangesStatus::Unchanged,
+        )
     }
+}
+
+/// The file extension to use for [FileMode::NewFile]
+/// also adds another ".rs", so that IDE's can syntax highlight correctly
+const DSYNCNEW: &str = ".dsyncnew.rs";
+
+/// Write a [MarkedFile] depending on what [FileMode] is used and add it to [Vec<FileChanges>]
+fn write_file(
+    config: &GenerationConfig,
+    mut file: MarkedFile,
+    file_status: &mut Vec<FileChanges>,
+) -> Result<()> {
+    let (write, file_change_status) = match config.file_mode {
+        FileMode::Overwrite => (true, FileChangesStatus::Modified),
+        FileMode::NewFile => {
+            let old_path = file.path;
+            let mut file_name = old_path
+                .file_name()
+                .ok_or(Error::other("Expected file to have a file_name"))?
+                .to_os_string();
+            file_name.push(DSYNCNEW);
+
+            file.path = old_path.clone();
+            file.path.set_file_name(file_name);
+
+            (true, FileChangesStatus::NewFile(old_path))
+        }
+        FileMode::None => (false, FileChangesStatus::UnchangedIgnored),
+    };
+
+    // additional "is_modified" check, because "newfile" changed the path and write would generate a file even if unchanged
+    if write && file.is_modified() {
+        file.write()?;
+    }
+
+    // set status to "Unchanged" if no change happened and to "UnchangedIgnored" if a change happened, but not written
+    file_status.push(FileChanges::from_markedfile_custom(
+        &file,
+        file_change_status,
+        FileChangesStatus::Unchanged,
+    ));
+
+    Ok(())
 }
 
 /// Generate all models for a given diesel schema input file
@@ -256,7 +332,12 @@ pub fn generate_files(
 
     if config.once_common_structs {
         let mut common_file = MarkedFile::new(output_dir.join("common.rs"))?;
-        common_file.ensure_file_signature()?;
+
+        // dont check file signature if a ".dsyncnew" file will be generated
+        if config.file_mode != FileMode::NewFile {
+            common_file.ensure_file_signature()?;
+        }
+
         common_file.change_file_contents({
             let mut tmp = String::from(FILE_SIGNATURE);
             tmp.push('\n');
@@ -265,11 +346,11 @@ pub fn generate_files(
             ));
             tmp
         });
-        common_file.write()?;
 
+        write_file(&config, common_file, &mut file_status)?;
+
+        // always write the "mod" statement, even if "write_file" is not writing
         mod_rs.ensure_mod_stmt("common");
-
-        file_status.push(FileChanges::from(&common_file));
     }
 
     // pass 1: add code for new tables
@@ -303,24 +384,30 @@ pub fn generate_files(
 
         let mut table_generated_rs = MarkedFile::new(table_dir.join(table_file_name))?;
 
-        table_generated_rs.ensure_file_signature()?;
-        table_generated_rs.change_file_contents(table
-            .generated_code
-            .as_ref()
-            .ok_or(Error::other(format!(
-                "Expected code for table \"{}\" to be generated",
-                table.struct_name
-            )))?
-            .clone());
-        table_generated_rs.write()?;
+        // dont check file signature if a ".dsyncnew" file will be generated
+        if config.file_mode != FileMode::NewFile {
+            table_generated_rs.ensure_file_signature()?;
+        }
 
-        file_status.push(FileChanges::from(&table_generated_rs)); // TODO: implement for ::NewFile
+        table_generated_rs.change_file_contents(
+            table
+                .generated_code
+                .as_ref()
+                .ok_or(Error::other(format!(
+                    "Expected code for table \"{}\" to be generated",
+                    table.struct_name
+                )))?
+                .clone(),
+        );
+
+        write_file(&config, table_generated_rs, &mut file_status)?;
 
         if !config.single_model_file {
             let mut table_mod_rs = MarkedFile::new(table_dir.join("mod.rs"))?;
 
             table_mod_rs.ensure_mod_stmt("generated");
             table_mod_rs.ensure_use_stmt("generated::*");
+            // always write the "mod" statement, even if "write_file" is not writing
             table_mod_rs.write()?;
 
             file_status.push(FileChanges::from(&table_mod_rs));
@@ -365,12 +452,22 @@ pub fn generate_files(
             continue;
         }
 
-        // this table was deleted, let's delete the generated code
-        std::fs::remove_file(&generated_rs_path).attach_path_err(&generated_rs_path)?;
-        file_status.push(FileChanges::new(
-            &generated_rs_path,
-            FileChangesStatus::Deleted,
-        ));
+        match config.file_mode {
+            FileMode::Overwrite => {
+                // this table was deleted, let's delete the generated code
+                std::fs::remove_file(&generated_rs_path).attach_path_err(&generated_rs_path)?;
+                file_status.push(FileChanges::new(
+                    &generated_rs_path,
+                    FileChangesStatus::Deleted,
+                ));
+            }
+            FileMode::NewFile | FileMode::None => {
+                file_status.push(FileChanges::new(
+                    &generated_rs_path,
+                    FileChangesStatus::DeletedIgnored,
+                ));
+            }
+        }
 
         // remove the mod.rs file if there isn't anything left in there except the use stmt
         let table_mod_rs_path = item.path().join("mod.rs");
@@ -379,14 +476,36 @@ pub fn generate_files(
 
             table_mod_rs.remove_mod_stmt("generated");
             table_mod_rs.remove_use_stmt("generated::*");
-            table_mod_rs.write()?;
 
             if table_mod_rs.get_file_contents().trim().is_empty() {
-                let table_mod_rs = table_mod_rs.delete()?;
-                file_status.push(FileChanges::new(&table_mod_rs, FileChangesStatus::Deleted));
+                if config.file_mode == FileMode::Overwrite {
+                    let table_mod_rs = table_mod_rs.delete()?;
+                    file_status.push(FileChanges::new(&table_mod_rs, FileChangesStatus::Deleted));
+                } else {
+                    file_status.push(FileChanges::new(
+                        &table_mod_rs,
+                        FileChangesStatus::DeletedIgnored,
+                    ));
+                }
             } else {
-                table_mod_rs.write()?; // write the changes we made above
-                file_status.push(FileChanges::from(&table_mod_rs));
+                // not using "write_file" because of custom "NewFile" handling
+                let (write, file_change_status) = match config.file_mode {
+                    FileMode::Overwrite => (true, FileChangesStatus::Modified),
+                    FileMode::NewFile | FileMode::None => {
+                        (false, FileChangesStatus::UnchangedIgnored)
+                    }
+                };
+
+                if write && table_mod_rs.is_modified() {
+                    table_mod_rs.write()?;
+                }
+
+                // set status to "Unchanged" if no change happened and to "UnchangedIgnored" if a change happened, but not written
+                file_status.push(FileChanges::from_markedfile_custom(
+                    &table_mod_rs,
+                    file_change_status,
+                    FileChangesStatus::Unchanged,
+                ));
             }
         }
 
@@ -401,10 +520,14 @@ pub fn generate_files(
             std::fs::remove_dir(item.path()).attach_path_err(item.path())?;
         }
 
-        // remove the module from the main mod_rs file
-        mod_rs.remove_mod_stmt(associated_table_name);
+        // dont remove "mod" statement on delete for anything other than ::Overwrite
+        if config.file_mode == FileMode::Overwrite {
+            // remove the module from the main mod_rs file
+            mod_rs.remove_mod_stmt(associated_table_name);
+        }
     }
 
+    // always write the "mod" statement, even if "write_file" is not writing
     mod_rs.write()?;
 
     file_status.push(FileChanges::from(&mod_rs));
