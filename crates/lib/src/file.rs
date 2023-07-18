@@ -1,6 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use crate::error::{Error, IOErrorToError, Result};
+use crate::{
+    error::{Error, IOErrorToError, Result},
+    FILE_SIGNATURE,
+};
 
 pub struct MarkedFile {
     /// File contents to read / to write
@@ -30,6 +33,10 @@ impl MarkedFile {
 
     pub fn is_modified(&self) -> bool {
         self.modified
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.file_contents.is_empty() || self.file_contents.trim() == FILE_SIGNATURE
     }
 
     pub fn has_use_stmt(&self, use_name: &str) -> bool {
