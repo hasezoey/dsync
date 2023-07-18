@@ -42,6 +42,9 @@ pub struct TableOptions<'a> {
 
     /// Indicated whether or not to generate "impls"
     impls: Option<bool>,
+
+    /// Use "str" over "String" for "Create*" structs
+    create_str_over_string: Option<bool>,
 }
 
 impl<'a> TableOptions<'a> {
@@ -77,6 +80,10 @@ impl<'a> TableOptions<'a> {
 
     pub fn get_generate_impls(&self) -> bool {
         self.impls.unwrap_or(true)
+    }
+
+    pub fn get_create_str(&self) -> bool {
+        self.create_str_over_string.unwrap_or(false)
     }
 
     pub fn ignore(self) -> Self {
@@ -130,6 +137,13 @@ impl<'a> TableOptions<'a> {
         }
     }
 
+    pub fn create_str_over_string(self) -> Self {
+        Self {
+            create_str_over_string: Some(true),
+            ..self
+        }
+    }
+
     pub fn set_read_only(&mut self, bool: bool) {
         self.read_only = Some(bool);
     }
@@ -151,6 +165,7 @@ impl<'a> TableOptions<'a> {
             only_necessary_derives: self.only_necessary_derives.or(other.only_necessary_derives),
             read_only: self.read_only.or(other.read_only),
             impls: self.impls.or(other.impls),
+            create_str_over_string: self.create_str_over_string.or(other.create_str_over_string),
         }
     }
 }

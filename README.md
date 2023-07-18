@@ -126,6 +126,7 @@ cargo install dsync-hasezoey
 * `--read-only-prefix`: (optional, repeatable) table prefixes to treat as read-only tables (like `view_`)
 * `--no-impls`: (optional) set to disable generating `impl Struct` (only generate the structs)
 * `--lessen-conflicts`: (optional) set to lessen conflicts with diesel types
+* `--create-str`: (optional) set to have `Create*` structs be generated with `&'a str` instead of `String`
 
 Notes:
 

@@ -10,6 +10,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 - add option `no-impls` to not generate any `impl Struct`s (like `read`, `create`, `paginate`)
 - add option `once-connection` to only output the connection type once in `common.rs` instead of in all files
 - add option `lessen-conflicts` to lessen conflict with diesel types (like having to import `Connection`)
+- add option `create-str` to have `Create*` structs be generated with `&'a str` instead of `String`
 
 ## 0.2.0
 

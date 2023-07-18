@@ -107,6 +107,10 @@ pub struct MainOptions {
     /// Lessen Conflicts with diesel types
     #[arg(long = "lessen-conflicts")]
     pub lessen_conflicts: bool,
+
+    /// Use "str" over "String" for "Create*" structs
+    #[arg(long = "create-str")]
+    pub create_str: bool,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq, Copy)]

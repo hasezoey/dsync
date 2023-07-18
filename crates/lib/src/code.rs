@@ -274,10 +274,18 @@ impl<'a> Struct<'a> {
         let mut lines = vec![];
         for field in fields.iter() {
             let field_name = &field.name;
-            let field_type = if field.is_optional {
-                format!("Option<{}>", field.base_type)
+            let base_type: &str = if self.ty == StructType::Create
+                && field.base_type == "String"
+                && self.opts.get_create_str()
+            {
+                &"&'a str"
             } else {
-                field.base_type.clone()
+                &field.base_type
+            };
+            let field_type = if field.is_optional {
+                format!("Option<{}>", base_type)
+            } else {
+                base_type.into()
             };
 
             lines.push(format!(
@@ -300,10 +308,16 @@ impl<'a> Struct<'a> {
             ),
         };
 
+        let lifetimes = if self.ty == StructType::Create && self.opts.get_create_str() {
+            "<'a>"
+        } else {
+            ""
+        };
+
         let struct_code = format!(
             "{struct_doc}{tsync_attr}{derive_attr}
 #[diesel(table_name={table_name}{primary_key}{belongs_to})]
-pub struct {struct_name} {{
+pub struct {struct_name}{lifetimes} {{
 {lines}
 }}\n",
             tsync_attr = self.attr_tsync(),

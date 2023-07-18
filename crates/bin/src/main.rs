@@ -65,6 +65,10 @@ fn actual_main() -> anyhow::Result<()> {
         default_table_options = default_table_options.disable_impls();
     }
 
+    if args.create_str {
+        default_table_options = default_table_options.create_str_over_string();
+    }
+
     let changes = dsync_hasezoey::generate_files(
         args.input,
         args.output,
