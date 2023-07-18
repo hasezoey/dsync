@@ -590,7 +590,10 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
     if config.default_table_options.get_serde() {
         imports_buffer.push_str("use serde::{Deserialize, Serialize};\n");
     };
-    if config.once_common_structs || config.once_connection {
+    // dont generate "common" import if no "impl" is generated, because it is a useless import then
+    if (config.once_common_structs || config.once_connection)
+        && config.default_table_options.get_generate_impls()
+    {
         if config.lessen_conflicts {
             imports_buffer.push_str(&format!("use {}common;\n", config.model_path));
         } else {

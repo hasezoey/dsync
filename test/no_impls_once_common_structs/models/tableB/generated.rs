@@ -3,7 +3,6 @@
 use crate::diesel::*;
 use crate::models::table_a::TableA;
 use serde::{Deserialize, Serialize};
-use crate::models::common::*;
 use crate::schema::*;
 
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
