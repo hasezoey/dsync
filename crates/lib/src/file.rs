@@ -55,6 +55,11 @@ impl MarkedFile {
         }
     }
 
+    /// Change `file_contents` to be `new_content` always, does not set `modified`
+    pub fn change_file_contents_no_modify(&mut self, new_content: String) {
+        self.file_contents = new_content;
+    }
+
     pub fn add_use_stmt(&mut self, use_name: &str) {
         self.file_contents = self.file_contents.trim().to_string();
         if !self.file_contents.is_empty() {
