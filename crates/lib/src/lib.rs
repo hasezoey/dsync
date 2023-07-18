@@ -391,7 +391,10 @@ pub fn generate_files(
     if config.once_connection {
         common_file.change_file_contents({
             let mut tmp = String::from(common_file.get_file_contents());
-            tmp.push_str(&format!("type Connection = {};", config.connection_type));
+            if !common_file.is_empty() {
+                tmp.push('\n');
+            }
+            tmp.push_str(&format!("type Connection = {};\n", config.connection_type));
             tmp
         })
     }
