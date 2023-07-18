@@ -7,6 +7,7 @@ This Changelog only lists the changes done to this fork and since 0.0.13
 - fix that a file is created if the file does not exist on `MarkedFile::new`
 - add option `read-only-prefix` to set prefixes for tables to treat as read-only (like `view_`)
 - add option `no-impls` to not generate any `impl Struct`s (like `read`, `create`, `paginate`)
+- add option `once-connection` to only output the connection type once in `common.rs` instead of in all files
 
 ## 0.2.0
 

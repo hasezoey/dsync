@@ -78,6 +78,7 @@ fn actual_main() -> anyhow::Result<()> {
             single_model_file: args.single_model_file,
             file_mode: args.file_mode.into(),
             read_only_prefix: args.read_only_prefix,
+            once_connection: args.once_connection,
         },
     )?;
 

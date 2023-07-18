@@ -177,6 +177,8 @@ pub struct GenerationConfig<'a> {
     pub file_mode: FileMode,
     /// A prefix of read-only tables
     pub read_only_prefix: Option<Vec<String>>,
+    /// Only generate the "Connection" type once
+    pub once_connection: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -367,28 +369,39 @@ pub fn generate_files(
     // check that the mod.rs file exists
     let mut mod_rs = MarkedFile::new(output_dir.join("mod.rs"))?;
 
+    let mut common_file = MarkedFile::new(output_dir.join("common.rs"))?;
+
+    // dont check file signature if a ".dsyncnew" file will be generated
+    if config.file_mode != FileMode::NewFile {
+        common_file.ensure_file_signature()?;
+    }
+
+    common_file.change_file_contents_no_modify(format!("{}\n", FILE_SIGNATURE));
+
     if config.once_common_structs {
-        let mut common_file = MarkedFile::new(output_dir.join("common.rs"))?;
-
-        // dont check file signature if a ".dsyncnew" file will be generated
-        if config.file_mode != FileMode::NewFile {
-            common_file.ensure_file_signature()?;
-        }
-
         common_file.change_file_contents({
-            let mut tmp = String::from(FILE_SIGNATURE);
-            tmp.push('\n');
+            let mut tmp = String::from(common_file.get_file_contents());
             tmp.push_str(&code::generate_common_structs(
                 &config.default_table_options,
             ));
             tmp
         });
+    }
 
-        write_file(&config, common_file, &mut file_status)?;
+    if config.once_connection {
+        common_file.change_file_contents({
+            let mut tmp = String::from(common_file.get_file_contents());
+            tmp.push_str(&format!("type Connection = {};", config.connection_type));
+            tmp
+        })
+    }
 
+    if !common_file.is_empty() {
         // always write the "mod" statement, even if "write_file" is not writing
         mod_rs.ensure_mod_stmt("common");
     }
+
+    write_file(&config, common_file, &mut file_status)?;
 
     // pass 1: add code for new tables
     for table in generated.iter() {

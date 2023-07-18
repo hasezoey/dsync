@@ -568,18 +568,20 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
     if config.default_table_options.get_serde() {
         imports_buffer.push_str("use serde::{Deserialize, Serialize};\n");
     };
-    if config.once_common_structs {
+    if config.once_common_structs || config.once_connection {
         imports_buffer.push_str(&format!("use {}common::*;\n", config.model_path));
     };
 
-    imports_buffer.push_str(&format!("use {}*;", config.schema_path));
+    imports_buffer.push_str(&format!("use {}*;\n", config.schema_path));
 
-    format!(
-        "{imports_buffer}
+    if !config.once_connection {
+        imports_buffer.push_str(&format!(
+            "\ntype Connection = {};\n",
+            config.connection_type
+        ));
+    }
 
-type Connection = {connection_type};\n",
-        connection_type = config.connection_type,
-    )
+    imports_buffer
 }
 
 /// Generate full file for for a given diesel table

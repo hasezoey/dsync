@@ -99,6 +99,10 @@ pub struct MainOptions {
     /// Dont generate any "impl" and only generate the model structs themself
     #[arg(long = "no-impls")]
     pub no_impls: bool,
+
+    /// Only generate the type "Connection" once and put it in "common.rs"
+    #[arg(long = "once-connection")]
+    pub once_connection: bool,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq, Copy)]
