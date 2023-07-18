@@ -38,6 +38,9 @@ pub struct TableOptions<'a> {
 
     /// Indicate that this table is read-only
     read_only: Option<bool>,
+
+    /// Indicated whether or not to generate "impls"
+    impls: Option<bool>,
 }
 
 impl<'a> TableOptions<'a> {
@@ -69,6 +72,10 @@ impl<'a> TableOptions<'a> {
 
     pub fn get_read_only(&self) -> bool {
         self.read_only.unwrap_or_default()
+    }
+
+    pub fn get_generate_impls(&self) -> bool {
+        self.impls.unwrap_or(true)
     }
 
     pub fn ignore(self) -> Self {
@@ -115,6 +122,13 @@ impl<'a> TableOptions<'a> {
         }
     }
 
+    pub fn disable_impls(self) -> Self {
+        Self {
+            impls: Some(false),
+            ..self
+        }
+    }
+
     pub fn set_read_only(&mut self, bool: bool) {
         self.read_only = Some(bool);
     }
@@ -135,6 +149,7 @@ impl<'a> TableOptions<'a> {
             use_serde: self.use_serde.or(other.use_serde),
             only_necessary_derives: self.only_necessary_derives.or(other.only_necessary_derives),
             read_only: self.read_only.or(other.read_only),
+            impls: self.impls.or(other.impls),
         }
     }
 }

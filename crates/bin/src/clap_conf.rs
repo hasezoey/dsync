@@ -95,6 +95,10 @@ pub struct MainOptions {
     /// A prefix to treat a table as read-only, like "view_"
     #[arg(long = "read-only-prefix")]
     pub read_only_prefix: Option<Vec<String>>,
+
+    /// Dont generate any "impl" and only generate the model structs themself
+    #[arg(long = "no-impls")]
+    pub no_impls: bool,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq, Copy)]

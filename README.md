@@ -124,11 +124,14 @@ cargo install dsync-hasezoey
   * `newfile`: If changes to the original file would be done, create a `.dsyncnew.rs` file instead
   * `none`: Do not change the file and do not create a new file (still lists the file if changes would be done)
 * `--read-only-prefix`: (optional, repeatable): table prefixes to treat as read-only tables (like `view_`)
+* `--no-impls`: (optional) set to disable generating `impl Struct` (only generate the structs)
 
 Notes:
 
 * any other `file-mode` than `newfile` will check that the file is a dsync-managed file
 * if `--once-common-structs` is used, then when a table named `common` is found, a error it thrown
+* if `--no-impls` is used without `--once-common-structs`, no `PaginationResult` struct is generated
+* if `--no-impls` and `--once-common-structs` are used, `PaginationResult` is generated into `common.rs`
 
 `./test/readme_cli_base_example`:
 

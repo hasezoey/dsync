@@ -61,6 +61,10 @@ fn actual_main() -> anyhow::Result<()> {
         default_table_options = default_table_options.only_necessary_derives();
     }
 
+    if args.no_impls {
+        default_table_options = default_table_options.disable_impls();
+    }
+
     let changes = dsync_hasezoey::generate_files(
         args.input,
         args.output,

@@ -341,6 +341,10 @@ fn build_table_fns(
 ) -> Result<String> {
     let table_options = config.table(&table.name.to_string());
 
+    if !table_options.get_generate_impls() {
+        return Ok(String::new());
+    }
+
     let primary_column_name_and_type: Vec<(String, String)> = table
         .primary_key_columns
         .iter()
