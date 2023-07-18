@@ -3,6 +3,7 @@ mod error;
 mod file;
 mod parser;
 
+use code::get_connection_type_name;
 use error::IOErrorToError;
 pub use error::{Error, Result};
 
@@ -179,6 +180,8 @@ pub struct GenerationConfig<'a> {
     pub read_only_prefix: Option<Vec<String>>,
     /// Only generate the "Connection" type once
     pub once_connection: bool,
+    /// Lessen conflicts with diesel types
+    pub lessen_conflicts: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -394,7 +397,11 @@ pub fn generate_files(
             if !common_file.is_empty() {
                 tmp.push('\n');
             }
-            tmp.push_str(&format!("type Connection = {};\n", config.connection_type));
+            tmp.push_str(&format!(
+                "type {} = {};\n",
+                get_connection_type_name(&config),
+                config.connection_type
+            ));
             tmp
         })
     }

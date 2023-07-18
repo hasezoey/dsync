@@ -123,8 +123,9 @@ cargo install dsync-hasezoey
   * `overwrite`: Overwrite original if exists and has dsync file signature
   * `newfile`: If changes to the original file would be done, create a `.dsyncnew.rs` file instead
   * `none`: Do not change the file and do not create a new file (still lists the file if changes would be done)
-* `--read-only-prefix`: (optional, repeatable): table prefixes to treat as read-only tables (like `view_`)
+* `--read-only-prefix`: (optional, repeatable) table prefixes to treat as read-only tables (like `view_`)
 * `--no-impls`: (optional) set to disable generating `impl Struct` (only generate the structs)
+* `--lessen-conflicts`: (optional) set to lessen conflicts with diesel types
 
 Notes:
 

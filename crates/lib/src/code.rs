@@ -416,11 +416,13 @@ fn build_table_fns(
 "##
     ));
 
+    let connection_type_path = get_connection_type_path(config);
+
     if create_struct.has_fields() {
         buffer.push_str(&format!(
             r##"
     /// Insert a new row on {table_name} with a given [`{create_struct_identifier}`]
-    pub{async_keyword} fn create(db: &mut Connection, item: &{create_struct_identifier}) -> QueryResult<Self> {{
+    pub{async_keyword} fn create(db: &mut {connection_type_path}, item: &{create_struct_identifier}) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
         insert_into({table_name}).values(item).get_result::<Self>(db){await_keyword}
@@ -431,7 +433,7 @@ fn build_table_fns(
         buffer.push_str(&format!(
             r##"
     /// Insert a new row on {table_name} with all default values
-    pub{async_keyword} fn create(db: &mut Connection) -> QueryResult<Self> {{
+    pub{async_keyword} fn create(db: &mut {connection_type_path}) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
         insert_into({table_name}).default_values().get_result::<Self>(db){await_keyword}
@@ -443,7 +445,7 @@ fn build_table_fns(
     buffer.push_str(&format!(
         r##"
     /// Get a specific row with the primary key
-    pub{async_keyword} fn read(db: &mut Connection, {item_id_params}) -> QueryResult<Self> {{
+    pub{async_keyword} fn read(db: &mut {connection_type_path}, {item_id_params}) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
         {table_name}.{item_id_filters}.first::<Self>(db){await_keyword}
@@ -451,16 +453,22 @@ fn build_table_fns(
 "##
     ));
 
+    let pagination_result_path = if config.lessen_conflicts {
+        "common::PaginationResult"
+    } else {
+        "PaginationResult"
+    };
+
     buffer.push_str(&format!(r##"
     /// Paginates through the table where page is a 0-based index (i.e. page 0 is the first page)
-    pub{async_keyword} fn paginate(db: &mut Connection, page: i64, page_size: i64) -> QueryResult<PaginationResult<Self>> {{
+    pub{async_keyword} fn paginate(db: &mut {connection_type_path}, page: i64, page_size: i64) -> QueryResult<{pagination_result_path}<Self>> {{
         use {schema_path}{table_name}::dsl::*;
 
         let page_size = if page_size < 1 {{ 1 }} else {{ page_size }};
         let total_items = {table_name}.count().get_result(db){await_keyword}?;
         let items = {table_name}.limit(page_size).offset(page * page_size).load::<Self>(db){await_keyword}?;
 
-        Ok(PaginationResult {{
+        Ok({pagination_result_path} {{
             items,
             total_items,
             page,
@@ -482,7 +490,7 @@ fn build_table_fns(
 
         buffer.push_str(&format!(r##"
     /// Update a row given the primary key with updates from [`{update_struct_identifier}`]
-    pub{async_keyword} fn update(db: &mut Connection, {item_id_params}, item: &{update_struct_identifier}) -> QueryResult<Self> {{
+    pub{async_keyword} fn update(db: &mut {connection_type_path}, {item_id_params}, item: &{update_struct_identifier}) -> QueryResult<Self> {{
         use {schema_path}{table_name}::dsl::*;
 
         diesel::update({table_name}.{item_id_filters}).set(item).get_result(db){await_keyword}
@@ -494,7 +502,7 @@ fn build_table_fns(
         buffer.push_str(&format!(
             r##"
     /// Delete a row with the given primary key
-    pub{async_keyword} fn delete(db: &mut Connection, {item_id_params}) -> QueryResult<usize> {{
+    pub{async_keyword} fn delete(db: &mut {connection_type_path}, {item_id_params}) -> QueryResult<usize> {{
         use {schema_path}{table_name}::dsl::*;
 
         diesel::delete({table_name}.{item_id_filters}).execute(db){await_keyword}
@@ -569,14 +577,19 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
         imports_buffer.push_str("use serde::{Deserialize, Serialize};\n");
     };
     if config.once_common_structs || config.once_connection {
-        imports_buffer.push_str(&format!("use {}common::*;\n", config.model_path));
+        if config.lessen_conflicts {
+            imports_buffer.push_str(&format!("use {}common;\n", config.model_path));
+        } else {
+            imports_buffer.push_str(&format!("use {}common::*;\n", config.model_path));
+        }
     };
 
     imports_buffer.push_str(&format!("use {}*;\n", config.schema_path));
 
     if !config.once_connection {
         imports_buffer.push_str(&format!(
-            "\ntype Connection = {};\n",
+            "\ntype {} = {};\n",
+            get_connection_type_name(config),
             config.connection_type
         ));
     }
@@ -607,4 +620,26 @@ pub fn generate_for_table(table: ParsedTableMacro, config: &GenerationConfig) ->
     Ok(format!(
         "{FILE_SIGNATURE}\n\n{imports}\n{structs}\n{functions}\n"
     ))
+}
+
+/// Get the path to the connection type, assuming "common" is imported
+fn get_connection_type_path(config: &GenerationConfig) -> String {
+    let mut tmp = String::new();
+
+    if config.once_connection && config.lessen_conflicts {
+        tmp.push_str("common::");
+    }
+
+    tmp.push_str(&get_connection_type_name(config));
+
+    tmp
+}
+
+/// Get the ident name to use for "connection_type"
+pub fn get_connection_type_name(config: &GenerationConfig) -> String {
+    if config.lessen_conflicts {
+        "ConnectionType".into()
+    } else {
+        "Connection".into()
+    }
 }

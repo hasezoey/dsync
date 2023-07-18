@@ -103,6 +103,10 @@ pub struct MainOptions {
     /// Only generate the type "Connection" once and put it in "common.rs"
     #[arg(long = "once-connection")]
     pub once_connection: bool,
+
+    /// Lessen Conflicts with diesel types
+    #[arg(long = "lessen-conflicts")]
+    pub lessen_conflicts: bool,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq, Copy)]
