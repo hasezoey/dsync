@@ -272,12 +272,14 @@ impl<'a> Struct<'a> {
 
         let fields = self.fields();
         let mut lines = vec![];
+        let mut require_lifetimes = false;
         for field in fields.iter() {
             let field_name = &field.name;
             let base_type: &str = if self.ty == StructType::Create
                 && field.base_type == "String"
                 && self.opts.get_create_str()
             {
+                require_lifetimes = true;
                 &"&'a str"
             } else {
                 &field.base_type
@@ -308,7 +310,7 @@ impl<'a> Struct<'a> {
             ),
         };
 
-        let lifetimes = if self.ty == StructType::Create && self.opts.get_create_str() {
+        let lifetimes = if require_lifetimes && self.ty == StructType::Create && self.opts.get_create_str() {
             "<'a>"
         } else {
             ""

@@ -11,3 +11,10 @@ diesel::table! {
         updated_at -> Timestamptz,
     }
 }
+
+diesel::table! {
+    test (id) {
+        id -> Int4,
+        completed -> Bool,
+    }
+}
