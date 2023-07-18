@@ -48,12 +48,12 @@ impl MarkedFile {
         self.file_contents.contains(&format!("pub mod {mod_name};"))
     }
 
-    /// Change `file_contents` to be `new_content`, only if they dont match
+    /// Change `file_contents` to be `new_content`, sets `modified`
     pub fn change_file_contents(&mut self, new_content: String) {
-        if self.file_contents != new_content {
-            self.file_contents = new_content;
+        if !self.modified && self.file_contents != new_content {
             self.modified = true;
         }
+        self.file_contents = new_content;
     }
 
     /// Change `file_contents` to be `new_content` always, does not set `modified`
