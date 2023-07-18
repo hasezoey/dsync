@@ -5,6 +5,7 @@ use crate::{
     FILE_SIGNATURE,
 };
 
+#[derive(Debug)]
 pub struct MarkedFile {
     /// File contents to read / to write
     file_contents: String,
