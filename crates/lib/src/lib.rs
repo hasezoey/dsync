@@ -413,7 +413,7 @@ pub fn generate_files(
                 tmp.push('\n');
             }
             tmp.push_str(&format!(
-                "type {} = {};\n",
+                "pub type {} = {};\n",
                 get_connection_type_name(&config),
                 config.connection_type
             ));
