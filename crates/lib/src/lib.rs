@@ -413,7 +413,7 @@ pub fn generate_files(
                 tmp.push('\n');
             }
             tmp.push_str(&format!(
-                "pub type {} = {};\n",
+                "/// Connection Type as set in dsync\npub type {} = {};\n",
                 get_connection_type_name(&config),
                 config.connection_type
             ));

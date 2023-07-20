@@ -3,6 +3,7 @@
 use crate::diesel::*;
 use crate::schema::*;
 
+/// Connection Type as set in dsync
 type Connection = diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::PgConnection>>;
 
 /// Struct representing a row for table `todos`

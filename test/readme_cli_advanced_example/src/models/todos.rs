@@ -4,6 +4,7 @@ use crate::diesel::*;
 use crate::models::common::*;
 use crate::schema::*;
 
+/// Connection Type as set in dsync
 type Connection = diesel::SqliteConnection;
 
 /// Struct representing a row for table `todos`

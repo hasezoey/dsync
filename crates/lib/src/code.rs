@@ -607,7 +607,7 @@ fn build_imports(table: &ParsedTableMacro, config: &GenerationConfig) -> String 
 
     if !config.once_connection {
         imports_buffer.push_str(&format!(
-            "\ntype {} = {};\n",
+            "\n/// Connection Type as set in dsync\ntype {} = {};\n",
             get_connection_type_name(config),
             config.connection_type
         ));

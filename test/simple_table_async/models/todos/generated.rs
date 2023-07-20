@@ -5,6 +5,7 @@ use diesel_async::RunQueryDsl;
 use serde::{Deserialize, Serialize};
 use crate::schema::*;
 
+/// Connection Type as set in dsync
 type Connection = diesel_async::pooled_connection::deadpool::Object<diesel_async::AsyncPgConnection>;
 
 /// Struct representing a row for table `todos`
