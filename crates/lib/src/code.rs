@@ -310,11 +310,12 @@ impl<'a> Struct<'a> {
             ),
         };
 
-        let lifetimes = if require_lifetimes && self.ty == StructType::Create && self.opts.get_create_str() {
-            "<'a>"
-        } else {
-            ""
-        };
+        let lifetimes =
+            if require_lifetimes && self.ty == StructType::Create && self.opts.get_create_str() {
+                "<'a>"
+            } else {
+                ""
+            };
 
         let struct_code = format!(
             "{struct_doc}{tsync_attr}{derive_attr}
