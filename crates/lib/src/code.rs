@@ -116,15 +116,15 @@ impl<'a> Struct<'a> {
         ""
     }
 
-    const DERIVES_DEFAULT: &[&'static str] = &["Debug", "Clone"];
-    const DERIVE_Queryable: &str = "Queryable";
-    const DERIVE_Insertable: &str = "Insertable";
-    const DERIVE_Selectable: &str = "Selectable";
-    const DERIVE_Associations: &str = "Associations";
-    const DERIVE_Identifiable: &str = "Identifiable";
-    const DERIVE_AsChangeset: &str = "AsChangeset";
-    const DERIVE_Serde_Serialize: &str = "Serialize";
-    const DERIVE_Serde_Deserialize: &str = "Deserialize";
+    const DERIVES_DEFAULT: &'static [&'static str] = &["Debug", "Clone"];
+    const DERIVE_Queryable: &'static str = "Queryable";
+    const DERIVE_Insertable: &'static str = "Insertable";
+    const DERIVE_Selectable: &'static str = "Selectable";
+    const DERIVE_Associations: &'static str = "Associations";
+    const DERIVE_Identifiable: &'static str = "Identifiable";
+    const DERIVE_AsChangeset: &'static str = "AsChangeset";
+    const DERIVE_Serde_Serialize: &'static str = "Serialize";
+    const DERIVE_Serde_Deserialize: &'static str = "Deserialize";
 
     fn attr_derive(&self) -> String {
         let mut derives: Vec<&str> = Vec::from(Self::DERIVES_DEFAULT);
