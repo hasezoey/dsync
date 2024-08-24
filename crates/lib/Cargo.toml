@@ -17,9 +17,9 @@ async = []
 backtrace = []
 
 [dependencies]
-syn = { version = "1", features = ["extra-traits", "full"] }
+syn = { version = "1.0", features = ["extra-traits", "full"] }
 thiserror = "1.0"
-proc-macro2 = "1"
+proc-macro2 = "1.0"
 heck = "0.4" # same case converter diesel uses
 
 [lib]
