@@ -280,7 +280,7 @@ impl<'a> Struct<'a> {
                 && self.opts.get_create_str()
             {
                 require_lifetimes = true;
-                &"&'a str"
+                "&'a str"
             } else {
                 &field.base_type
             };
