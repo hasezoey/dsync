@@ -1,7 +1,7 @@
 [package]
 name = "libdsync-hasezoey"
 description = "Generate rust structs & query functions from diesel schema files."
-version = "0.2.0"
+version = "0.3.0+deprecated"
 readme = "README.md"
 repository = "https://github.com/hasezoey/dsync"
 license = "MIT OR Apache-2.0"
@@ -25,3 +25,6 @@ heck = "0.4" # same case converter diesel uses
 [lib]
 name = "dsync_hasezoey"
 path = "src/lib.rs"
+
+[badges.maintenance]
+status = "deprecated"

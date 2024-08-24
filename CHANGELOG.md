@@ -2,7 +2,7 @@
 
 This Changelog only lists the changes done to this fork and since 0.0.13
 
-## next
+## 0.3.0
 
 - fix that a file is created if the file does not exist on `MarkedFile::new`
 - fix so that all entries in `common.rs` are properly new-lined

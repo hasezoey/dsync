@@ -1,5 +1,7 @@
 # dsync
 
+**0.3.0 is the final version of this fork, the original has development again and has feature parity**
+
 **This is a fork of [Wulf's dsync](https://github.com/Wulf/dsync) with some Pull Requests merged, see [Difference with original](#difference-with-original)**
 
 <a href="https://crates.io/crates/dsync"><img src="https://img.shields.io/crates/v/dsync.svg?style=for-the-badge" height="20" alt="License: MIT OR Apache-2.0" /></a>
@@ -185,6 +187,8 @@ This tool is distributed under the terms of both the MIT license and the Apache 
 See LICENSE-APACHE, LICENSE-MIT, and COPYRIGHT for details.
 
 ## Difference with original
+
+This fork has been deprecated as the [original project](https://github.com/Wulf/dsync) is maintained again and at least on git has feature-parity.
 
 This Fork was made because the [original project](https://github.com/Wulf/dsync) was not updated anymore since March 2023 and had become incompatible with diesel 2.1.0.
 
